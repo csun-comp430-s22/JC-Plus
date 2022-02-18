@@ -1,4 +1,6 @@
-Language Design Proposal: ```JC+ ```
+<p align="center">Language Design Proposal</p>
+
+
 
 Developer Name(s): ```Osher Boudara, Vidas Sileikis, Alexis Diaz```
 
