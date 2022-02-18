@@ -2,7 +2,6 @@
 
 
 
-Developer Name(s): ```Osher Boudara, Vidas Sileikis, Alexis Diaz```
 
 Language Name: ```JC+```
 
