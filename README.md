@@ -1,6 +1,7 @@
 Language Design Proposal: ```JC+ ```
 
-Student Name(s): ```Osher Boudara, Vidas Sileikis, Alexis Diaz```
+Developer Name(s): ```Osher Boudara, Vidas Sileikis, Alexis Diaz```
+
 Language Name: ```JC+```
 
 Compiler Implementation Language and Reasoning: ```Java. We all decided on Java because we are all familiar with the language, having taken courses that require us to code in Java.```
