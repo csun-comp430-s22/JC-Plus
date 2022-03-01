@@ -12,7 +12,8 @@ public class Tokenizer {
     }
 
     public void skipWhitespace() {
-        while (Character.isWhitespace((input.charAt(offset)))) {
+        while (offset<input.length() &&
+        Character.isWhitespace((input.charAt(offset)))) {
             offset++;
         }
     }
@@ -123,7 +124,7 @@ public class Tokenizer {
             }
             
             
-            // else if .. //TODO: add all different types of tokens similar to above
+            // else if .. TODO: add all different types of tokens similar to above
             else {
                 throw new TokenizerException();
             }
