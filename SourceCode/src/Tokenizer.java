@@ -27,27 +27,27 @@ public class Tokenizer {
         if (offset < input.length()) {
             if (input.startsWith("]", offset)) {
                 offset += 1;
-                return new RightBracket();
+                return new RightBracketToken();
 
             } else if (input.startsWith("[", offset)) {
                 offset += 1;
-                return new LeftBracket();
+                return new LeftBracketToken();
 
             } else if (input.startsWith("}", offset)) {
                 offset += 1;
-                return new RightCurly();
+                return new RightCurlyToken();
 
             } else if (input.startsWith("{", offset)) {
                 offset += 1;
-                return new LeftCurly();
+                return new LeftCurlyToken();
 
             } else if (input.startsWith(")", offset)) {
                 offset += 1;
-                return new RightParenthesis();
+                return new RightParenthesisToken();
 
             } else if (input.startsWith("(", offset)) {
                 offset += 1;
-                return new LeftParenthesis();
+                return new LeftParenthesisToken();
 
             } else if (input.startsWith("println", offset)) {
                 offset += 7;
@@ -133,6 +133,7 @@ public class Tokenizer {
         }
 
     }
+ 
 
     public List<Token> tokenize() throws TokenizerException {
 
