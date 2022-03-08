@@ -13,7 +13,7 @@ public class TokenizerTest {
         assert (tokens.size() == 0);
 
     }
-
+    
     public static void main(String[] args) throws TokenizerException {
         // check that tokenizing empty string works
        testOnlyWhiteSpace();

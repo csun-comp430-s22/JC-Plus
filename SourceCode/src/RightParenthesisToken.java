@@ -1,15 +1,15 @@
-public class LeftCurly implements Token {
+public class RightParenthesisToken implements Token {
 
     public boolean equals(final Object other) { // logic to make equals work for each token
-        return other instanceof LeftCurly;
+        return other instanceof RightParenthesisToken;
     }
 
     public int hashCode() { // if two objects are not equal to eachother they will not return the same
                             // hashcode
-        return 3;
+        return 4;
     }
 
     public String toString() {
-        return "{";
+        return ")";
     }
 }
