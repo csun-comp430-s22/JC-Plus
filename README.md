@@ -22,42 +22,42 @@ integer is a number
 methodname is the name of a method
 classname is a class name
 
-type::= Int | Void | type[] | Built-in types
- 	classname class type; includes Object and String
+type::= Int | Void | type[] |  // Built-in types
+ 	      classname class type; // includes Object and String
 
-op ::= + | - | * | / Arithmetic operations
+op ::= + | - | * | /  // Arithmetic operations
 
-exp ::= var | integer | Variables and integers are expressions
-  this | Refers to my instance
-  new type[exp] | Array declaration
-  var[exp]; | Access array element
-  len(exp); | get length of array 
- exp op exp | Arithmetic operations
- exp.methodname(exp*) | Calls a method
- new classname(exp*) | Creates a new instance of a class
+exp ::= var | integer |  // Variables and integers are expressions
+        this | // Refers to my instance
+        new type[exp] | // Array declaration
+        var[exp]; | // Access array element
+        len(exp); | // get length of array 
+        exp op exp | // Arithmetic operations
+        exp.methodname(exp*) | // Calls a method
+        new classname(exp*) | // Creates a new instance of a class
 
-vardec ::= type var | Variable declaration
+vardec ::= type var | // Variable declaration
 
-stmt ::= 	vardec = exp; | Variable declaration and assignment
-		{ stmt*; } | block of code with several statements
-var = exp; | Assignment 
-`println` `(` `exp` `)` | Prints something to the terminal
-exp.methodname(exp*) | Calls a method
-var[exp] = exp; | Modify array element where exp is of equal type
-while (exp)  stmt  | while loops 
-break; | break 
-if (exp) stmt else stmt | if/else 
-return exp; | return an expression 
-return; | return Void 
+stmt ::= 	vardec = exp; | // Variable declaration and assignment
+		      { stmt*; } | // block of code with several statements
+          var = exp; | // Assignment 
+          `println` `(` `exp` `)` | // Prints something to the terminal
+          exp.methodname(exp*) | // Calls a method
+          var[exp] = exp; | // Modify array element where exp is of equal type
+          while (exp)  stmt  | // while loops 
+          break; | // break 
+          if (exp) stmt else stmt | // if/else 
+          return exp; | // return an expression 
+          return; | // return Void 
 
-methoddef ::= type methodname( vardec*) stmt | type vardecs are comma-separated
+methoddef ::= type methodname( vardec*) stmt | // type vardecs are comma-separated
 
-instancedec ::= vardec; instance variable declaration 
+instancedec ::= vardec; // instance variable declaration 
 
 classdef ::= class classname extends classname { 
-instancedec* 
-constructor(vardec*) stmt* vardecs are comma-sep 
-methoddef* } 
+              instancedec* 
+              constructor(vardec*) stmt* // vardecs are comma-sep 
+              methoddef* } 
 
 
 ```
