@@ -17,140 +17,154 @@ public class Tokenizer {
             offset++;
         }
     }
+  // returns null if it wasn't an integer token
+  public integerToken tryTokenizeInteger() {
+    skipWhitespace();
 
-    // returns null if there are no more tokens left
-    public Token tokenizeSingle() throws TokenizerException {
+    // 12345
+    String number = "";
 
-        // skip whitespace - breaks for trailing whitespace
-        skipWhitespace();
+    while (offset < input.length() &&
+           Character.isDigit(input.charAt(offset))) {
+        number += input.charAt(offset);
+        offset++;
+    }
 
-        if (offset < input.length()) {
-            if (input.startsWith("]", offset)) {
-                offset += 1;
-                return new RightBracketToken();
+    if (number.length() > 0) {
+        // convert string to an integer
+        return new integerToken(Integer.parseInt(number));
+    } else {
+        return null;
+    }
+}
+  // returns null if it fails to read in any variable or keyword
+  public Token tryTokenizeVariableOrKeyword() {
+    skipWhitespace();
+    
+    String name = "";
 
-            } else if (input.startsWith("[", offset)) {
-                offset += 1;
-                return new LeftBracketToken();
+    // idea: read one character at a time
+    // when we are out of characters, check what the name is
+    // if the name is special (e.g., "true"), emit the special token for it (e.g., TrueToken)
+    // if the name isn't special (e.g., "foo"), emit a variable token for it (e.g., VariableToken("foo"))
+    //
+    // First character of the variable: letter
+    // Every subsequent character: letter or a digit
+    //
 
-            } else if (input.startsWith("}", offset)) {
-                offset += 1;
-                return new RightCurlyToken();
+    if (offset < input.length() &&
+        Character.isLetter(input.charAt(offset))) {
+        name += input.charAt(offset);
+        offset++;
 
-            } else if (input.startsWith("{", offset)) {
-                offset += 1;
-                return new LeftCurlyToken();
+        while (offset < input.length() &&
+               Character.isLetterOrDigit(input.charAt(offset))) {
+            name += input.charAt(offset);
+            offset++;
+        }
 
-            } else if (input.startsWith(")", offset)) {
-                offset += 1;
-                return new RightParenthesisToken();
-
-            } else if (input.startsWith("(", offset)) {
-                offset += 1;
-                return new LeftParenthesisToken();
-
-            } else if (input.startsWith("println", offset)) {
-                offset += 7;
-                return new PrintToken();
-
-            } else if (input.startsWith("+", offset)) {
-                offset += 1;
-                return new PlusToken();
-
-            } else if (input.startsWith("-", offset)) {
-                offset += 1;
-                return new MinusToken();
-
-            } else if (input.startsWith("*", offset)) {
-                offset += 1;
-                return new MultiplicationToken();
-
-            } else if (input.startsWith("/", offset)) {
-                offset += 1;
-                return new DivisionToken();
-
-            } else if (input.startsWith("if", offset)) {
-                offset += 2;
-                return new ifToken();
-
-            } else if (input.startsWith("else", offset)) {
-                offset += 4;
-                return new elseToken();
-
-            } else if (input.startsWith("while", offset)) {
-                offset += 5;
-                return new whileToken();
-
-            } else if (input.startsWith("break", offset)) {
-                offset += 5;
-                return new breakToken();
-
-            } else if (input.startsWith("return", offset)) {
-                offset += 6;
-                return new returnToken();
-
-            } else if (input.startsWith("Void", offset)) {
-                offset += 4;
-                return new voidToken();
-
-            } else if (input.startsWith("Int", offset)) {
-                offset += 3;
-                return new intToken();
-
-            } else if (input.startsWith("len", offset)) {
-                offset += 3;
-                return new lengthToken();
-
-            } else if (input.startsWith("this", offset)) {
-                offset += 4;
-                return new thisToken();
-
-            } else if (input.startsWith("new", offset)) {
-                offset += 3;
-                return new newToken();
-
-            } else if (input.startsWith("class", offset)) {
-                offset += 5;
-                return new classToken();
-
-            } else if (input.startsWith("extends", offset)) {
-                offset += 7;
-                return new extendsToken();
-
-            } else if (input.startsWith(";", offset)) {
-                offset += 1;
-                return new semiColonToken();
-
-            }
-            
-            
-            // else if .. TODO: add all different types of tokens similar to above
-            else {
-                throw new TokenizerException();
-            }
+        // by this point, `name` holds a potential variable
+        // `name` could be "true"
+        if (name.equals("this")) {
+            return new thisToken();
+        } else if (name.equals("class")) {
+            return new classToken();
+        }else if (name.equals("break")) {
+            return new breakToken();
+        } else if (name.equals("extends")) {
+            return new extendsToken();
+        }  else if (name.equals("Int")) {
+            return new intToken();
+        } else if (name.equals("len")) {
+            return new lengthToken();
+        } else if (name.equals("new")) {
+            return new newToken();
+        } else if (name.equals("println")) {
+            return new PrintToken();
+        } else if (name.equals("return")) {
+            return new returnToken();
+        }else if (name.equals("Void")) {
+            return new voidToken();
+        } else if (name.equals("while")) {
+            return new whileToken();
+        }  else if (name.equals("if")) {
+            return new ifToken();
+        } else if (name.equals("else")) {
+            return new elseToken();
         } else {
-            return null;
+            return new variableToken(name);
         }
-
+    } else {
+        return null;
     }
- 
+}
 
-    public List<Token> tokenize() throws TokenizerException {
+// returns null if it couldn't read in a symbol
+public Token tryTokenizeSymbol() {
+    skipWhitespace();
+    Token retval = null;
+    
+    if (input.startsWith("(", offset)) {
+        offset += 1;
+        retval = new LeftParenthesisToken();
+    } else if (input.startsWith(")", offset)) {
+        offset += 1;
+        retval = new RightParenthesisToken();
+    } else if (input.startsWith("[", offset)) {
+        offset += 1;
+        retval = new LeftBracketToken();
+    } else if (input.startsWith("]", offset)) {
+        offset += 1;
+        retval = new RightBracketToken();
+    }  else if (input.startsWith("{", offset)) {
+        offset += 1;
+        retval = new LeftCurlyToken();
+    } else if (input.startsWith("}", offset)) {
+        offset += 1;
+        retval = new RightCurlyToken();
+    }else if (input.startsWith("-", offset)) {
+        offset += 1;
+        retval = new MinusToken();
+    } else if (input.startsWith("/", offset)) {
+        offset += 1;
+        retval = new DivisionToken();
+    }else if (input.startsWith("*", offset)) {
+        offset += 1;
+        retval = new MultiplicationToken();
+    }else if (input.startsWith("+", offset)) {
+        offset += 1;
+        retval = new PlusToken();
+    } else if (input.startsWith(";", offset)) {
+        offset += 1;
+        retval = new semiColonToken();
+    } 
 
-        final List<Token> tokens = new ArrayList<Token>();
-        Token token = tokenizeSingle();
+    return retval;
+}
 
-        while (token != null) {
-            tokens.add(token);
-            token = tokenizeSingle();
-        }
-        while (offset < input.length()) {
-
-            if (token != null)
-                tokens.add(tokenizeSingle());
-        }
-
-        return tokens;
+// returns null if there are no more tokens left
+public Token tokenizeSingle() throws TokenizerException {
+    Token retval = null;
+    skipWhitespace();
+    if (offset < input.length() &&
+        (retval = tryTokenizeVariableOrKeyword()) == null &&
+        (retval = tryTokenizeInteger()) == null &&
+        (retval = tryTokenizeSymbol()) == null) {
+        throw new TokenizerException();
     }
+
+    return retval;
+}
+public List<Token> tokenize() throws TokenizerException {
+    final List<Token> tokens = new ArrayList<Token>();
+    Token token = tokenizeSingle();
+
+    while (token != null) {
+        tokens.add(token);
+        token = tokenizeSingle();
+    }
+
+    return tokens;
+}
 
 }
