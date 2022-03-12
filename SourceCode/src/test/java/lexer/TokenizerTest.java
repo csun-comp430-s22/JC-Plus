@@ -4,34 +4,41 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 
 public class TokenizerTest {
 
-    @Test //annotation
-    public void testEmptyString() throws TokenizerException {
-        Tokenizer tokenizer = new Tokenizer("");
-        List<Token> tokens = tokenizer.tokenize();
-        assertEquals(0, tokens.size());
+    public void assertTokenizes(final String input, final Token[] expected) {
+        try {
+            final Tokenizer tokenizer = new Tokenizer(input);
+            final List<Token> received = tokenizer.tokenize();
+            assertArrayEquals(expected,
+                    received.toArray(new Token[received.size()]));
+        } catch (final TokenizerException e) {
+            fail("Tokenizer threw exception");
+        }
+    }
+
+    @Test // annotation
+    public void testEmptyString() {
+
+        // Check that tokenizing empty string works
+        assertTokenizes("", new Token[0]);
 
     }
 
     @Test
     public void testOnlyWhiteSpace() throws TokenizerException {
-        Tokenizer tokenizer = new Tokenizer("     ");
-        List<Token> tokens = tokenizer.tokenize();
-        assertEquals(0, tokens.size());
+        assertTokenizes("     ", new Token[0]);
 
     }
 
     @Test
     public void testThisByItself() throws TokenizerException {
-        Tokenizer tokenizer = new Tokenizer("this");
-        List<Token> tokens = tokenizer.tokenize();
-        assertEquals(1, tokens.size());
-        Token thisToken = tokens.get(0);
-        assertTrue(thisToken instanceof ThisToken);
+        assertTokenizes("this", new Token[] { new ThisToken() });
     }
-    //TODO: add the rests of the token tests such as above ^
+    // TODO: add the rests of the token tests such as above ^
 
 }
