@@ -32,11 +32,6 @@ public class TokenizerTest {
         Token thisToken = tokens.get(0);
         assertTrue(thisToken instanceof ThisToken);
     }
+    //TODO: add the rests of the token tests such as above ^
 
-    // public static void main(String[] args) throws TokenizerException {
-    //     // check that tokenizing empty string works
-    //     testOnlyWhiteSpace();
-    //     testEmptyString();
-    //     testThisByItself();
-    // }
 }
