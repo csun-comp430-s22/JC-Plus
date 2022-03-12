@@ -153,6 +153,9 @@ public Token tryTokenizeSymbol() {
     } else if (input.startsWith("!=", offset)) {
         offset += 2;
         retval = new NotEqualToken();
+    } else if (input.startsWith(".", offset)) {
+        offset += 1;
+        retval = new DotToken();
     } 
 
     return retval;
