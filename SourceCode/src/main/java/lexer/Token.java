@@ -1,3 +1,5 @@
+package lexer;
+
 public interface Token {
 
     // already pre-defined on object but just for reference

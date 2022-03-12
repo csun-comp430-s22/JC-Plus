@@ -1,7 +1,9 @@
-public class extendsToken implements Token {
+package lexer;
+
+public class ExtendsToken implements Token {
 
     public boolean equals(final Object other) { // logic to make equals work for each token
-        return other instanceof extendsToken;
+        return other instanceof ExtendsToken;
     }
 
     public int hashCode() { // if two objects are not equal to eachother they will not return the same

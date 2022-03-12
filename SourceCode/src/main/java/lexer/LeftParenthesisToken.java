@@ -1,3 +1,5 @@
+package lexer;
+
 public class LeftParenthesisToken implements Token {
 
     public boolean equals(final Object other) { // logic to make equals work for each token

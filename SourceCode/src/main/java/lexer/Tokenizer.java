@@ -1,3 +1,4 @@
+package lexer;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -18,7 +19,7 @@ public class Tokenizer {
         }
     }
   // returns null if it wasn't an integer token
-  public integerToken tryTokenizeInteger() {
+  public IntegerToken tryTokenizeInteger() {
     skipWhitespace();
 
     // 12345
@@ -32,7 +33,7 @@ public class Tokenizer {
 
     if (number.length() > 0) {
         // convert string to an integer
-        return new integerToken(Integer.parseInt(number));
+        return new IntegerToken(Integer.parseInt(number));
     } else {
         return null;
     }
@@ -66,33 +67,33 @@ public class Tokenizer {
         // by this point, `name` holds a potential variable
         // `name` could be "true"
         if (name.equals("this")) {
-            return new thisToken();
+            return new ThisToken();
         } else if (name.equals("class")) {
-            return new classToken();
+            return new ClassToken();
         }else if (name.equals("break")) {
-            return new breakToken();
+            return new BreakToken();
         } else if (name.equals("extends")) {
-            return new extendsToken();
+            return new ExtendsToken();
         }  else if (name.equals("Int")) {
-            return new intToken();
+            return new IntToken();
         } else if (name.equals("len")) {
-            return new lengthToken();
+            return new LengthToken();
         } else if (name.equals("new")) {
-            return new newToken();
+            return new NewToken();
         } else if (name.equals("println")) {
             return new PrintToken();
         } else if (name.equals("return")) {
-            return new returnToken();
+            return new ReturnToken();
         }else if (name.equals("Void")) {
-            return new voidToken();
+            return new VoidToken();
         } else if (name.equals("while")) {
-            return new whileToken();
+            return new WhileToken();
         }  else if (name.equals("if")) {
-            return new ifToken();
+            return new IfToken();
         } else if (name.equals("else")) {
-            return new elseToken();
+            return new ElseToken();
         } else {
-            return new variableToken(name);
+            return new VariableToken(name);
         }
     } else {
         return null;
@@ -136,7 +137,7 @@ public Token tryTokenizeSymbol() {
         retval = new PlusToken();
     } else if (input.startsWith(";", offset)) {
         offset += 1;
-        retval = new semiColonToken();
+        retval = new SemiColonToken();
     } 
 
     return retval;

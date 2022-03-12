@@ -1,3 +1,5 @@
+package lexer;
+
 public class LeftCurlyToken implements Token {
 
     public boolean equals(final Object other) { // logic to make equals work for each token
