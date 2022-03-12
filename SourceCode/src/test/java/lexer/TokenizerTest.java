@@ -21,7 +21,7 @@ public class TokenizerTest {
         }
     }
 
-    @Test // annotation
+    @Test
     public void testEmptyString() {
 
         // Check that tokenizing empty string works
@@ -30,15 +30,55 @@ public class TokenizerTest {
     }
 
     @Test
-    public void testOnlyWhiteSpace() throws TokenizerException {
+    public void testOnlyWhiteSpace() {
+
+        // Check that tokenizing only white space works
         assertTokenizes("     ", new Token[0]);
 
     }
 
     @Test
-    public void testThisByItself() throws TokenizerException {
+    public void testThisByItself() {
+
+        // Check that tokenizing "this" works
         assertTokenizes("this", new Token[] { new ThisToken() });
     }
     // TODO: add the rests of the token tests such as above ^
+
+    @Test
+    public void testThisThisIsVariable() {
+
+        // Check that tokenizing "this" works
+        assertTokenizes("thisthis", new Token[] { new VariableToken("thisthis") });
+    }
+
+    @Test
+    public void testThisSpaceThisIsVariable() {
+
+        // Check that tokenizing "this" works
+        assertTokenizes("this this", new Token[] { new ThisToken(), new ThisToken() });
+    }
+
+
+    @Test
+    public void testMultiDigitInteger() {
+        assertTokenizes("123", new Token[] { new IntegerToken(123)});
+    }
+    @Test
+    public void testSingleDigitInteger() {
+        assertTokenizes("1", new Token[] { new IntegerToken(1)});
+    }
+    
+    @Test
+    public void testAllRemaining() {
+        assertTokenizes("(){}else if", new Token[] {
+                new LeftParenthesisToken(),
+                new RightParenthesisToken(),
+                new LeftCurlyToken(),
+                new RightCurlyToken(),
+                new ElseToken(),
+                new IfToken(),
+        });
+    }
 
 }
