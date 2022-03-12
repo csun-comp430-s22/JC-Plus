@@ -2,31 +2,41 @@ package lexer;
 
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
 public class TokenizerTest {
-    public static void testEmptyString() throws TokenizerException {
+
+    @Test //annotation
+    public void testEmptyString() throws TokenizerException {
         Tokenizer tokenizer = new Tokenizer("");
         List<Token> tokens = tokenizer.tokenize();
-        assert (tokens.size() == 0);
+        assertEquals(0, tokens.size());
 
     }
 
-    public static void testOnlyWhiteSpace() throws TokenizerException {
+    @Test
+    public void testOnlyWhiteSpace() throws TokenizerException {
         Tokenizer tokenizer = new Tokenizer("     ");
         List<Token> tokens = tokenizer.tokenize();
-        assert (tokens.size() == 0);
+        assertEquals(0, tokens.size());
 
     }
 
-    public static void testThisByItself() throws TokenizerException {
+    @Test
+    public void testThisByItself() throws TokenizerException {
         Tokenizer tokenizer = new Tokenizer("this");
         List<Token> tokens = tokenizer.tokenize();
-        assert (tokens.size() == 0);
+        assertEquals(1, tokens.size());
+        Token thisToken = tokens.get(0);
+        assertTrue(thisToken instanceof ThisToken);
     }
 
-    public static void main(String[] args) throws TokenizerException {
-        // check that tokenizing empty string works
-        testOnlyWhiteSpace();
-        testEmptyString();
-        testThisByItself();
-    }
+    // public static void main(String[] args) throws TokenizerException {
+    //     // check that tokenizing empty string works
+    //     testOnlyWhiteSpace();
+    //     testEmptyString();
+    //     testThisByItself();
+    // }
 }
