@@ -26,6 +26,7 @@ type::= Int | Void | type[] |  // Built-in types
  	      classname class type; // includes Object and String
 
 op ::= + | - | * | /  // Arithmetic operations
+       == | != | < | > // Comparison operations
 
 exp ::= var | integer |  // Variables and integers are expressions
         this | // Refers to my instance
