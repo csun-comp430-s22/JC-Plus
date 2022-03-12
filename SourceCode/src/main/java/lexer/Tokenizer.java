@@ -138,6 +138,21 @@ public Token tryTokenizeSymbol() {
     } else if (input.startsWith(";", offset)) {
         offset += 1;
         retval = new SemiColonToken();
+    } else if (input.startsWith("=", offset)) {
+        offset += 1;
+        retval = new AssignmentToken();
+    } else if (input.startsWith("==", offset)) {
+        offset += 2;
+        retval = new EqualsToken();
+    } else if (input.startsWith("<", offset)) {
+        offset += 1;
+        retval = new LessThanToken();
+    } else if (input.startsWith(">", offset)) {
+        offset += 1;
+        retval = new GreaterThanToken();
+    } else if (input.startsWith("!=", offset)) {
+        offset += 2;
+        retval = new NotEqualToken();
     } 
 
     return retval;
