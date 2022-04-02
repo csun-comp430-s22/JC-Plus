@@ -1,5 +1,24 @@
 Tokens:
 
+- AssignmentToken
+- BreakToken
+- ClassToken
+- DivisionToken
+- DotToken
+- ExtendsToken
+- GreaterThanToken
+- IntToken
+- LeftBracketToken
+- LengthToken
+- MultiplicationToken
+- NewToken
+- NotEqualToken
+- PrintToken
+- ReturnToken
+- RightBracketToken
+- ThisToken
+- VoidToken
+- WhileToken
 - PlusToken
 - MinusToken
 - LessThanToken
@@ -9,7 +28,7 @@ Tokens:
 - VariableToken(name)
 - IntegerToken(integer_value)
 - LeftParenToken
-- RghtParenToken
+- RightParenToken
 - LeftCurlyToken
 - RightCurlyToken
 - SemicolonToken
