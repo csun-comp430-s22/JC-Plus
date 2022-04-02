@@ -1,15 +1,15 @@
 package parser;
 
-public class LessThanOp implements Op {
+public class GreaterThanOp implements Op {
     public boolean equals(final Object other) {
-        return other instanceof LessThanOp;
+        return other instanceof DivisionOp;
     }
 
     public int hashCode() {
-        return 27;
+        return 26;
     }
 
     public String toString() {
-        return "LessThanOp";
+        return "GreaterThanOp";
     }
 }
