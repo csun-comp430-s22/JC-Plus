@@ -6,7 +6,7 @@ public class LessThanToken implements Token {
     }
 
     public int hashCode() {
-        return 2;
+        return 27;
     }
     
     public String toString() {

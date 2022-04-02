@@ -6,7 +6,7 @@ public class PlusToken implements Token {
     }
 
     public int hashCode() {
-        return 0;
+        return 7;
     }
     
     public String toString() {
