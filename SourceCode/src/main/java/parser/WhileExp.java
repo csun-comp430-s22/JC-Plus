@@ -1,11 +1,11 @@
 package parser;
 
-public class IfStmt implements Stmt {
+public class WhileExp implements Stmt {
     public final Exp guard;
     public final Stmt trueBranch;
     public final Stmt falseBranch;
 
-    public IfStmt(final Exp guard,
+    public WhileExp(final Exp guard,
                   final Stmt trueBranch,
                   final Stmt falseBranch) {
         this.guard = guard;
@@ -14,8 +14,8 @@ public class IfStmt implements Stmt {
     }
 
     public boolean equals(final Object other) {
-        if (other instanceof IfStmt) {
-            final IfStmt otherStmt = (IfStmt)other;
+        if (other instanceof WhileExp) {
+            final WhileExp otherStmt = (WhileExp)other;
             return (guard.equals(otherStmt.guard) &&
                     trueBranch.equals(otherStmt.trueBranch) &&
                     falseBranch.equals(otherStmt.falseBranch));
@@ -31,7 +31,7 @@ public class IfStmt implements Stmt {
     }
 
     public String toString() {
-        return ("IfStmt(" +
+        return ("WhileExp(" +
                 guard.toString() + ", " +
                 trueBranch.toString() + ", " +
                 falseBranch.toString() + ")");

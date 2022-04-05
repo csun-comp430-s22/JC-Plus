@@ -1,0 +1,39 @@
+package parser;
+
+public class IfExp implements Stmt {
+    public final Exp guard;
+    public final Stmt trueBranch;
+    public final Stmt falseBranch;
+
+    public IfExp(final Exp guard,
+                  final Stmt trueBranch,
+                  final Stmt falseBranch) {
+        this.guard = guard;
+        this.trueBranch = trueBranch;
+        this.falseBranch = falseBranch;
+    }
+
+    public boolean equals(final Object other) {
+        if (other instanceof IfExp) {
+            final IfExp otherStmt = (IfExp)other;
+            return (guard.equals(otherStmt.guard) &&
+                    trueBranch.equals(otherStmt.trueBranch) &&
+                    falseBranch.equals(otherStmt.falseBranch));
+        } else {
+            return false;
+        }
+    }
+
+    public int hashCode() {
+        return (guard.hashCode() +
+                trueBranch.hashCode() +
+                falseBranch.hashCode());
+    }
+
+    public String toString() {
+        return ("IfExp(" +
+                guard.toString() + ", " +
+                trueBranch.toString() + ", " +
+                falseBranch.toString() + ")");
+    }
+}
