@@ -163,7 +163,7 @@ public class Parser {
         while (shouldRun) {
             try {
                 final ParseResult<Op> multiplicationDivisionOp = parseMultiplicationDivisionOp(current.position);
-                final ParseResult<Exp> anotherPrimary = parsePrimaryExp(additiveOp.position);
+                final ParseResult<Exp> anotherPrimary = parsePrimaryExp(multiplicationDivisionOp.position);
                 current = new ParseResult<Exp>(new OpExp(current.result,
                         multiplicationDivisionOp.result,
                         anotherPrimary.result),
@@ -175,6 +175,43 @@ public class Parser {
 
         return current;
     } // parseMultiplicationDivisionExp
+
+    // greaterless_op ::= *
+    public ParseResult<Op> parseGreaterLessOp(final int position) throws ParseException {
+        final Token token = getToken(position);
+        if (token instanceof GreaterThanToken) {
+            return new ParseResult<Op>(new GreaterThanOp(), position + 1);
+        } else if (token instanceof LessThanToken) {
+            return new ParseResult<Op>(new LessThanOp(), position + 1);
+        } else {
+            throw new ParseException("expected < or >; received: " + token);
+        }
+    } // parseGreaterLessOp
+
+    // greaterless_exp ::= primary_exp (greaterless_op
+    // primary_exp)*
+    // 1 < 2
+    //
+    // 1 > 2
+    public ParseResult<Exp> parseGreaterLessExp(final int position) throws ParseException {
+        ParseResult<Exp> current = parsePrimaryExp(position);
+        boolean shouldRun = true;
+
+        while (shouldRun) {
+            try {
+                final ParseResult<Op> greaterlessOp = parseGreaterLessOp(current.position);
+                final ParseResult<Exp> anotherPrimary = parsePrimaryExp(greaterlessOp.position);
+                current = new ParseResult<Exp>(new OpExp(current.result,
+                        greaterlessOp.result,
+                        anotherPrimary.result),
+                        anotherPrimary.position);
+            } catch (final ParseException e) {
+                shouldRun = false;
+            }
+        }
+
+        return current;
+    } // parseGreaterLessExp
 
     // stmt ::= if (exp) stmt else stmt | while (exp) stmt break stmt | { stmt* } |
     // println(exp); | exp.methodname(exp*) | var = exp; | return exp; | return;
