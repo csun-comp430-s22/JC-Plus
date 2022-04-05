@@ -201,7 +201,7 @@ public class Parser {
             assertTokenHereIs(position + 1, new EqualsToken());
             final ParseResult<Exp> exp = parseExp(position + 2);
             assertTokenHereIs(exp.position + 1, new SemicolonToken());
-            return new ParseResult<Stmt>(new VariableExp(exp.result),
+            return new ParseResult<Stmt>(new AssignmentStmt(exp.result),
                                          exp.position + 2);
         } else {
             throw new ParseException("expected statement; received: " + token);

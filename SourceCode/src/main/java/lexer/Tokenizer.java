@@ -81,7 +81,7 @@ public class Tokenizer {
         } else if (name.equals("new")) {
             return new NewToken();
         } else if (name.equals("println")) {
-            return new PrintToken();
+            return new PrintlnToken();
         } else if (name.equals("return")) {
             return new ReturnToken();
         }else if (name.equals("Void")) {
