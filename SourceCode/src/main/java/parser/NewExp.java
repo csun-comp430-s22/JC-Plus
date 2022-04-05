@@ -1,22 +1,22 @@
 package parser;
 
 public class NewExp implements Exp {
-    public final String name;
+    public final Exp exp;
 
-    public NewExp(final String name) {
-        this.name = name;
+    public NewExp(final Exp exp) {
+        this.exp = exp;
+    }
+
+    public int hashCode() {
+        return exp.hashCode();
     }
 
     public boolean equals(final Object other) {
         return (other instanceof NewExp &&
-                name.equals(((NewExp) other).name));
-    }
-
-    public int hashCode() {
-        return name.hashCode();
+                exp.equals(((NewExp) other).exp));
     }
 
     public String toString() {
-        return "NewExp(" + name + ")";
+        return "NewExp(" + exp.toString() + ")";
     }
 }

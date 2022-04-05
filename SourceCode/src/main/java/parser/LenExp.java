@@ -1,22 +1,22 @@
 package parser;
 
 public class LenExp implements Exp {
-    public final String name;
+    public final Exp exp;
 
-    public LenExp(final String name) {
-        this.name = name;
+    public LenExp(final Exp exp) {
+        this.exp = exp;
+    }
+
+    public int hashCode() {
+        return exp.hashCode();
     }
 
     public boolean equals(final Object other) {
         return (other instanceof LenExp &&
-                name.equals(((LenExp) other).name));
-    }
-
-    public int hashCode() {
-        return name.hashCode();
+                exp.equals(((LenExp) other).exp));
     }
 
     public String toString() {
-        return "LenExp(" + name + ")";
+        return "LenExp(" + exp.toString() + ")";
     }
 }
