@@ -203,15 +203,24 @@ public class Parser {
             assertTokenHereIs(exp.position + 1, new SemicolonToken());
             return new ParseResult<Stmt>(new AssignmentStmt(exp.result),
                                          exp.position + 2);
+        } else if (token instanceof VariableToken) { //var[exp] = exp;
+            assertTokenHereIs(position + 1, new LeftBracketToken()); 
+            final ParseResult<Exp> exp = parseExp(position + 3);
+            assertTokenHereIs(exp.position + 1, new RightBracketToken());
+            assertTokenHereIs(position + 1, new EqualsToken()); 
+            final ParseResult<Exp> exp = parseExp(position + 3);
+            assertTokenHereIs(exp.position + 1, new SemicolonToken());
+            return new ParseResult<Stmt>(new AssignmentStmt(exp.result),
+                                         exp.position + 2);
         } else if (token instanceof ReturnToken) { //return exp;
             //assertTokenHereIs(position + 1, new WhiteSpaceToken());
             final ParseResult<Exp> exp = parseExp(position + 2); //+2 because we are skipping 1 whitespace
             assertTokenHereIs(exp.position + 1, new SemicolonToken());
             return new ParseResult<Stmt>(new ReturnStmt(exp.result),
                                          exp.position + 2);
-        } else if (token instanceof ReturnToken) { //return exp;
+        } else if (token instanceof ReturnToken) { //return;
             assertTokenHereIs(position + 1, new SemicolonToken());
-            final ParseResult<Exp> exp = new voidToken(); //+2 because we are skipping 1 whitespace
+            final ParseResult<Exp> exp = VOID; //TODO: make exp into void
             return new ParseResult<Stmt>(new ReturnStmt(exp.result),
                                          exp.position + 2);
         } else {
