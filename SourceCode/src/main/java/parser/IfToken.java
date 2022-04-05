@@ -1,16 +1,22 @@
 package parser;
 
 public class IfToken implements Token {
+    public final String name;
+
+    public IfToken(final String name) {
+        this.name = name;
+    }
+
     public boolean equals(final Object other) {
-        return other instanceof IfToken;
+        return (other instanceof IfToken &&
+                name.equals(((IfToken) other).name));
     }
 
     public int hashCode() {
-        return 4;
+        return name.hashCode();
     }
-    
+
     public String toString() {
-        return "IfToken";
+        return "IfToken(" + name + ")";
     }
 }
-

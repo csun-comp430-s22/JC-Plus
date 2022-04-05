@@ -1,17 +1,22 @@
 package parser;
 
 public class DivisionToken implements Token {
+    public final String name;
 
-    public boolean equals(final Object other) { // logic to make equals work for each token
-        return other instanceof DivisionToken;
+    public DivisionToken(final String name) {
+        this.name = name;
     }
 
-    public int hashCode() { // if two objects are not equal to eachother they will not return the same
-                            // hashcode
-        return 10;
+    public boolean equals(final Object other) {
+        return (other instanceof DivisionToken &&
+                name.equals(((DivisionToken) other).name));
+    }
+
+    public int hashCode() {
+        return name.hashCode();
     }
 
     public String toString() {
-        return "DivisionToken";
+        return "DivisionToken(" + name + ")";
     }
 }

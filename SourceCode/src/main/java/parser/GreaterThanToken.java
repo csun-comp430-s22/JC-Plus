@@ -1,17 +1,22 @@
 package parser;
 
 public class GreaterThanToken implements Token {
+    public final String name;
 
-    public boolean equals(final Object other) { // logic to make equals work for each token
-        return other instanceof GreaterThanToken;
+    public GreaterThanToken(final String name) {
+        this.name = name;
     }
 
-    public int hashCode() { // if two objects are not equal to eachother they will not return the same
-                            // hashcode
-        return 26;
+    public boolean equals(final Object other) {
+        return (other instanceof GreaterThanToken &&
+                name.equals(((GreaterThanToken) other).name));
+    }
+
+    public int hashCode() {
+        return name.hashCode();
     }
 
     public String toString() {
-        return "GreaterThanToken";
+        return "GreaterThanToken(" + name + ")";
     }
 }

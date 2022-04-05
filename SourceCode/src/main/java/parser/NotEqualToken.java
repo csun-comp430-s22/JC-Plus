@@ -1,17 +1,22 @@
 package parser;
 
 public class NotEqualToken implements Token {
+    public final String name;
 
-    public boolean equals(final Object other) { // logic to make equals work for each token
-        return other instanceof NotEqualToken;
+    public NotEqualToken(final String name) {
+        this.name = name;
     }
 
-    public int hashCode() { // if two objects are not equal to eachother they will not return the same
-                            // hashcode
-        return 28;
+    public boolean equals(final Object other) {
+        return (other instanceof NotEqualToken &&
+                name.equals(((NotEqualToken) other).name));
+    }
+
+    public int hashCode() {
+        return name.hashCode();
     }
 
     public String toString() {
-        return "NotEqualToken";
+        return "NotEqualToken(" + name + ")";
     }
 }
