@@ -67,13 +67,19 @@ public class Parser {
         } else if (token instanceof IntegerToken) {
             final int value = ((IntegerToken)token).value;
             return new ParseResult<Exp>(new IntegerExp(value), position + 1);
-        } else if (token instanceof LeftParenToken) {
+        } else if(token instanceof ThisToken) {
+            final String name = ((ThisToken)token).name;
+            return new ParseResult<Exp>(new ThisExp(name), position + 1);
+        } 
+        else if (token instanceof LeftParenToken) {
             final ParseResult<Exp> inParens = parseExp(position + 1);
             assertTokenHereIs(inParens.position, new RightParenToken());
             return new ParseResult<Exp>(inParens.result,
                                         inParens.position + 1);
         }
     } // parsePrimaryExp
+
+    
 
     // additive_op ::= + | -
     public ParseResult<Op> parseAdditiveOp(final int position) throws ParseException {

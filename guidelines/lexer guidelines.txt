@@ -9,7 +9,10 @@ Possible tokens:
 -   `return`
 -   `else if`
 -   'break'
--   variable
+-   'variable'
+-   '=='
+-   '!='
+-       
 
 
 Each token will have their own token files.
