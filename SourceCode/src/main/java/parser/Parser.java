@@ -139,8 +139,45 @@ public class Parser {
         return current;
     } // parseAdditiveExp
 
+    // multiplicationdivision_op ::= *
+    public ParseResult<Op> parseMultiplicationDivisionOp(final int position) throws ParseException {
+        final Token token = getToken(position);
+        if (token instanceof MultiplicationToken) {
+            return new ParseResult<Op>(new MultiplicationOp(), position + 1);
+        } else if (token instanceof DivisionToken) {
+            return new ParseResult<Op>(new DivisionOp(), position + 1);
+        } else {
+            throw new ParseException("expected * or /; received: " + token);
+        }
+    } // parseMultiplicationDivisionOp
+
+    // multiplicationdivision_exp ::= primary_exp (multiplicationdivision_op
+    // primary_exp)*
+    // 1 * 2
+    //
+    // 1/ 2
+    public ParseResult<Exp> parseMultiplicationDivisionExp(final int position) throws ParseException {
+        ParseResult<Exp> current = parsePrimaryExp(position);
+        boolean shouldRun = true;
+
+        while (shouldRun) {
+            try {
+                final ParseResult<Op> multiplicationDivisionOp = parseMultiplicationDivisionOp(current.position);
+                final ParseResult<Exp> anotherPrimary = parsePrimaryExp(additiveOp.position);
+                current = new ParseResult<Exp>(new OpExp(current.result,
+                        multiplicationDivisionOp.result,
+                        anotherPrimary.result),
+                        anotherPrimary.position);
+            } catch (final ParseException e) {
+                shouldRun = false;
+            }
+        }
+
+        return current;
+    } // parseMultiplicationDivisionExp
+
     // stmt ::= if (exp) stmt else stmt | while (exp) stmt break stmt | { stmt* } |
-    // println(exp); | var = exp; | return exp; | return;
+    // println(exp); | exp.methodname(exp*) | var = exp; | return exp; | return;
     public ParseResult<Stmt> parseStmt(final int position) throws ParseException {
         final Token token = getToken(position);
         // if
@@ -213,6 +250,14 @@ public class Parser {
             assertTokenHereIs(position + 1, new SemicolonToken());
             final ParseResult<Exp> exp = VOID; // TODO: make exp into void
             return new ParseResult<Stmt>(new ReturnStmt(exp.result),
+                    exp.position + 2);
+        } else if (token instanceof Exp) { /// exp.methodname(exp*)
+            assertTokenHereIs(position + 1, new DotToken());
+            final ParseResult<Exp> exp = parseExp(position + 2); // this should be methodname
+            assertTokenHereIs(exp.position, new LeftParenToken());
+            final ParseResult<Exp> exp2 = parseExp(exp.position + 2);
+            assertTokenHereIs(exp.position + 1, new RightParenToken());
+            return new ParseResult<Stmt>(new ExpMethodNameStmt(exp.result), // Implement exp.methodname stmt???
                     exp.position + 2);
         } else {
             throw new ParseException("expected statement; received: " + token);
