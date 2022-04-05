@@ -149,7 +149,7 @@ public class Parser {
     } // parseAdditiveExp
 
     // stmt ::= if (exp) stmt else stmt | while (exp) stmt break stmt | { stmt* } | 
-    // println(exp) | var = exp;
+    // println(exp); | var = exp; | return exp; | return;
     public ParseResult<Stmt> parseStmt(final int position) throws ParseException {
         final Token token = getToken(position);
         // if
@@ -190,18 +190,29 @@ public class Parser {
             }
             return new ParseResult<Stmt>(new BlockStmt(stmts),
                                          curPosition);
-        } else if (token instanceof PrintlnToken) {
+        } else if (token instanceof PrintlnToken) { //println(exp);
             assertTokenHereIs(position + 1, new LeftParenToken());
             final ParseResult<Exp> exp = parseExp(position + 2);
             assertTokenHereIs(exp.position, new RightParenToken());
             assertTokenHereIs(exp.position + 1, new SemicolonToken());
             return new ParseResult<Stmt>(new PrintlnStmt(exp.result),
                                          exp.position + 2);
-        }  else if (token instanceof VariableToken) {
-            assertTokenHereIs(position + 1, new EqualsToken());
-            final ParseResult<Exp> exp = parseExp(position + 2);
+        }  else if (token instanceof VariableToken) { //var = exp;
+            assertTokenHereIs(position + 2, new EqualsToken()); //+2 because we are skipping whitespace
+            final ParseResult<Exp> exp = parseExp(position + 3);
             assertTokenHereIs(exp.position + 1, new SemicolonToken());
             return new ParseResult<Stmt>(new AssignmentStmt(exp.result),
+                                         exp.position + 2);
+        } else if (token instanceof ReturnToken) { //return exp;
+            //assertTokenHereIs(position + 1, new WhiteSpaceToken());
+            final ParseResult<Exp> exp = parseExp(position + 2); //+2 because we are skipping 1 whitespace
+            assertTokenHereIs(exp.position + 1, new SemicolonToken());
+            return new ParseResult<Stmt>(new ReturnStmt(exp.result),
+                                         exp.position + 2);
+        } else if (token instanceof ReturnToken) { //return exp;
+            assertTokenHereIs(position + 1, new SemicolonToken());
+            final ParseResult<Exp> exp = new voidToken(); //+2 because we are skipping 1 whitespace
+            return new ParseResult<Stmt>(new ReturnStmt(exp.result),
                                          exp.position + 2);
         } else {
             throw new ParseException("expected statement; received: " + token);
