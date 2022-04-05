@@ -1,22 +1,15 @@
 package parser;
 
 public class LeftCurlyToken implements Token {
-    public final String name;
-
-    public LeftCurlyToken(final String name) {
-        this.name = name;
-    }
-
     public boolean equals(final Object other) {
-        return (other instanceof LeftCurlyToken &&
-                name.equals(((LeftCurlyToken) other).name));
+        return other instanceof LeftCurlyToken;
     }
 
     public int hashCode() {
-        return name.hashCode();
+        return 8;
     }
-
+    
     public String toString() {
-        return "LeftCurlyToken(" + name + ")";
+        return "LeftCurlyToken";
     }
 }

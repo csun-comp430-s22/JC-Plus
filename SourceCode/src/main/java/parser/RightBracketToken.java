@@ -1,22 +1,15 @@
 package parser;
 
 public class RightBracketToken implements Token {
-    public final String name;
-
-    public RightBracketToken(final String name) {
-        this.name = name;
-    }
-
     public boolean equals(final Object other) {
-        return (other instanceof RightBracketToken &&
-                name.equals(((RightBracketToken) other).name));
+        return other instanceof RightBracketToken;
     }
 
     public int hashCode() {
-        return name.hashCode();
+        return 0;
     }
 
     public String toString() {
-        return "RightBracketToken(" + name + ")";
+        return "RightBracketToken";
     }
 }

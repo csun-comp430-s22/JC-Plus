@@ -1,22 +1,15 @@
 package parser;
 
 public class EqualsToken implements Token {
-    public final String name;
-
-    public EqualsToken(final String name) {
-        this.name = name;
-    }
-
     public boolean equals(final Object other) {
-        return (other instanceof EqualsToken &&
-                name.equals(((EqualsToken) other).name));
+        return other instanceof EqualsToken;
     }
 
     public int hashCode() {
-        return name.hashCode();
+        return 3;
     }
 
     public String toString() {
-        return "EqualsToken(" + name + ")";
+        return "EqualsToken";
     }
 }

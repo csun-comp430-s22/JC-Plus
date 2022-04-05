@@ -61,56 +61,47 @@ public class Parser {
             throw new ParseException("expected: " + expected + "; received: " + received);
         }
     }
-    
+
     // primary_exp ::= x | i | `(` exp `)`
     public ParseResult<Exp> parsePrimaryExp(final int position) throws ParseException {
         final Token token = getToken(position);
         if (token instanceof VariableToken) {
-            final String name = ((VariableToken)token).name;
+            final String name = ((VariableToken) token).name;
             return new ParseResult<Exp>(new VariableExp(name), position + 1);
         } else if (token instanceof IntegerToken) {
-            final int value = ((IntegerToken)token).value;
+            final int value = ((IntegerToken) token).value;
             return new ParseResult<Exp>(new IntegerExp(value), position + 1);
-        }
-        else if (token instanceof LeftParenToken) {
+        } else if (token instanceof LeftParenToken) {
             final ParseResult<Exp> inParens = parseExp(position + 1);
             assertTokenHereIs(inParens.position, new RightParenToken());
             return new ParseResult<Exp>(inParens.result,
-                                        inParens.position + 1);
+                    inParens.position + 1);
         } else if (token instanceof LeftBracketToken) {
             final ParseResult<Exp> inParens = parseExp(position + 1);
             assertTokenHereIs(inParens.position, new RightBracketToken());
             return new ParseResult<Exp>(inParens.result,
-                                        inParens.position + 1);
+                    inParens.position + 1);
         }
     } // parsePrimaryExp
 
+    // secondary_exp ::= this | len | new | type
+    public ParseResult<Exp> parseSecondaryExp(final int position) throws ParseException {
+        final Token token = getToken(position);
+        if (token instanceof ThisToken) {
+            final String name = ((ThisToken) token).name;
+            return new ParseResult<Exp>(new ThisExp(name), position + 1);
+        } else if (token instanceof LenToken) {
+            final String name = ((LenToken) token).name;
+            return new ParseResult<Exp>(new LenExp(name), position + 1);
+        } else if (token instanceof NewToken) {
+            final String name = ((NewToken) token).name;
+            return new ParseResult<Exp>(new NewExp(name), position + 1);
+        } else if (token instanceof TypeToken) {
+            final String name = ((TypeToken) token).name;
+            return new ParseResult<Exp>(new TypeExp(name), position + 1);
+        }
 
-        // secondary_exp ::= this | len | new | type 
-        public ParseResult<Exp> parseSecondaryExp(final int position) throws ParseException {
-            final Token token = getToken(position);
-            if(token instanceof ThisToken) {
-                final String name = ((ThisToken)token).name;
-                return new ParseResult<Exp>(new ThisExp(name), position + 1);
-            } 
-            else if(token instanceof LenToken) {
-                final String name = ((LenToken)token).name;
-                return new ParseResult<Exp>(new LenExp(name), position + 1);
-            } 
-             else if(token instanceof NewToken) {
-                final String name = ((NewToken)token).name;
-                return new ParseResult<Exp>(new NewExp(name), position + 1);
-            } 
-            else if(token instanceof TypeToken) {
-                final String name = ((TypeToken)token).name;
-                return new ParseResult<Exp>(new TypeExp(name), position + 1);
-            } 
-            
-        } // parseSecondaryExp
-    
-      
-
-    
+    } // parseSecondaryExp
 
     // additive_op ::= + | -
     public ParseResult<Op> parseAdditiveOp(final int position) throws ParseException {
@@ -125,21 +116,21 @@ public class Parser {
     } // parseAdditiveOp
 
     // additive_exp ::= primary_exp (additive_op primary_exp)*
-    //                     1           +            2
+    // 1 + 2
     //
     // 1 + 2
     public ParseResult<Exp> parseAdditiveExp(final int position) throws ParseException {
         ParseResult<Exp> current = parsePrimaryExp(position);
         boolean shouldRun = true;
-        
+
         while (shouldRun) {
             try {
                 final ParseResult<Op> additiveOp = parseAdditiveOp(current.position);
                 final ParseResult<Exp> anotherPrimary = parsePrimaryExp(additiveOp.position);
                 current = new ParseResult<Exp>(new OpExp(current.result,
-                                                         additiveOp.result,
-                                                         anotherPrimary.result),
-                                               anotherPrimary.position);
+                        additiveOp.result,
+                        anotherPrimary.result),
+                        anotherPrimary.position);
             } catch (final ParseException e) {
                 shouldRun = false;
             }
@@ -148,7 +139,7 @@ public class Parser {
         return current;
     } // parseAdditiveExp
 
-    // stmt ::= if (exp) stmt else stmt | while (exp) stmt break stmt | { stmt* } | 
+    // stmt ::= if (exp) stmt else stmt | while (exp) stmt break stmt | { stmt* } |
     // println(exp); | var = exp; | return exp; | return;
     public ParseResult<Stmt> parseStmt(final int position) throws ParseException {
         final Token token = getToken(position);
@@ -161,9 +152,9 @@ public class Parser {
             assertTokenHereIs(trueBranch.position, new ElseToken());
             final ParseResult<Stmt> falseBranch = parseStmt(trueBranch.position + 1);
             return new ParseResult<Stmt>(new IfExp(guard.result,
-                                                   trueBranch.result,
-                                                   falseBranch.result),
-                                         falseBranch.position);
+                    trueBranch.result,
+                    falseBranch.result),
+                    falseBranch.position);
         } else if (token instanceof WhileToken) {
             assertTokenHereIs(position + 1, new LeftParenToken());
             final ParseResult<Exp> guard = parseExp(position + 2);
@@ -172,9 +163,9 @@ public class Parser {
             assertTokenHereIs(trueBranch.position, new BreakToken());
             final ParseResult<Stmt> falseBranch = parseStmt(trueBranch.position + 1);
             return new ParseResult<Stmt>(new WhileExp(guard.result,
-                                                   trueBranch.result,
-                                                   falseBranch.result),
-                                         falseBranch.position);
+                    trueBranch.result,
+                    falseBranch.result),
+                    falseBranch.position);
         } else if (token instanceof LeftCurlyToken) {
             final List<Stmt> stmts = new ArrayList<Stmt>();
             int curPosition = position + 1;
@@ -189,95 +180,95 @@ public class Parser {
                 }
             }
             return new ParseResult<Stmt>(new BlockStmt(stmts),
-                                         curPosition);
-        } else if (token instanceof PrintlnToken) { //println(exp);
+                    curPosition);
+        } else if (token instanceof PrintlnToken) { // println(exp);
             assertTokenHereIs(position + 1, new LeftParenToken());
             final ParseResult<Exp> exp = parseExp(position + 2);
             assertTokenHereIs(exp.position, new RightParenToken());
             assertTokenHereIs(exp.position + 1, new SemicolonToken());
             return new ParseResult<Stmt>(new PrintlnStmt(exp.result),
-                                         exp.position + 2);
-        }  else if (token instanceof VariableToken) { //var = exp;
-            assertTokenHereIs(position + 2, new EqualsToken()); //+2 because we are skipping whitespace
+                    exp.position + 2);
+        } else if (token instanceof VariableToken) { // var = exp;
+            assertTokenHereIs(position + 2, new EqualsToken()); // +2 because we are skipping whitespace
             final ParseResult<Exp> exp = parseExp(position + 3);
             assertTokenHereIs(exp.position + 1, new SemicolonToken());
             return new ParseResult<Stmt>(new AssignmentStmt(exp.result),
-                                         exp.position + 2);
-        } else if (token instanceof VariableToken) { //var[exp] = exp;
-            assertTokenHereIs(position + 1, new LeftBracketToken()); 
+                    exp.position + 2);
+        } else if (token instanceof VariableToken) { // var[exp] = exp;
+            assertTokenHereIs(position + 1, new parser.LeftBracketToken());
             final ParseResult<Exp> exp = parseExp(position + 3);
-            assertTokenHereIs(exp.position + 1, new RightBracketToken());
-            assertTokenHereIs(position + 1, new EqualsToken()); 
+            assertTokenHereIs(exp.position + 1, new parser.RightBracketToken());
+            assertTokenHereIs(position + 1, new EqualsToken());
             final ParseResult<Exp> exp = parseExp(position + 3);
             assertTokenHereIs(exp.position + 1, new SemicolonToken());
             return new ParseResult<Stmt>(new AssignmentStmt(exp.result),
-                                         exp.position + 2);
-        } else if (token instanceof ReturnToken) { //return exp;
-            //assertTokenHereIs(position + 1, new WhiteSpaceToken());
-            final ParseResult<Exp> exp = parseExp(position + 2); //+2 because we are skipping 1 whitespace
+                    exp.position + 2);
+        } else if (token instanceof ReturnToken) { // return exp;
+            // assertTokenHereIs(position + 1, new WhiteSpaceToken());
+            final ParseResult<Exp> exp = parseExp(position + 2); // +2 because we are skipping 1 whitespace
             assertTokenHereIs(exp.position + 1, new SemicolonToken());
             return new ParseResult<Stmt>(new ReturnStmt(exp.result),
-                                         exp.position + 2);
-        } else if (token instanceof ReturnToken) { //return;
+                    exp.position + 2);
+        } else if (token instanceof ReturnToken) { // return;
             assertTokenHereIs(position + 1, new SemicolonToken());
-            final ParseResult<Exp> exp = VOID; //TODO: make exp into void
+            final ParseResult<Exp> exp = VOID; // TODO: make exp into void
             return new ParseResult<Stmt>(new ReturnStmt(exp.result),
-                                         exp.position + 2);
+                    exp.position + 2);
         } else {
             throw new ParseException("expected statement; received: " + token);
         }
     } // parseStmt
-    
-    /*
-    // parser for op
-    // op ::= + | - | < | ==
-    public ParseResult<Op> parseOp(final int position) throws ParseException {
-        final Token token = getToken(position);
-        // with pattern matching (in Scala)
-        // token match {
-        //   case PlusToken => ParseResult(PlusOp(), position + 1)
-        //   case MinusToken => ParseResult(MinusOp(), position + 1)
-        //   ...
-        // }
-        if (token instanceof PlusToken) {
-            return new ParseResult<Op>(new PlusOp(), position + 1);
-        } else if (token instanceof MinusToken) {
-            return new ParseResult<Op>(new MinusOp(), position + 1);
-        } else if (token instanceof LessThanToken) {
-            return new ParseResult<Op>(new LessThanOp(), position + 1);
-        } else if (token instanceof EqualsToken) {
-            return new ParseResult<Op>(new EqualsOp(), position + 1);
-        } else {
-            throw new ParseException("expected operator; received: " + token);
-        }
-    }
 
-    // recursive descent parsing can't handle a grammar with left-recursion
-    // exp ::= x | i | exp op exp
-    //                  ^      ^
-    //                  |      |
-    //                 left    |
-    //                       right
-    public ParseResult<Exp> parseExp(final int position) throws ParseException {
-        final Token token = getToken(position);
-        if (token instanceof VariableToken) {
-            final String name = ((VariableToken)token).name;
-            return new ParseResult<Exp>(new VariableExp(name), position + 1);
-        } else if (token instanceof IntegerToken) {
-            final int value = ((IntegerToken)token).value;
-            return new ParseResult<Exp>(new IntegerExp(value), position + 1);
-        } else {
-            // Issue #1: operator precedence
-            // Issue #2: ??? - hint: this is recursive code
-            // Have base cases, have a recursive case.
-            final ParseResult<Exp> left = parseExp(position);
-            final ParseResult<Op> op = parseOp(left.position);
-            final ParseResult<Exp> right = parseExp(op.position);
-            return new ParseResult<Exp>(new OpExp(left.result,
-                                                  op.result,
-                                                  right.result),
-                                        right.position);
-        }
-    }
-    */
+    /*
+     * // parser for op
+     * // op ::= + | - | < | ==
+     * public ParseResult<Op> parseOp(final int position) throws ParseException {
+     * final Token token = getToken(position);
+     * // with pattern matching (in Scala)
+     * // token match {
+     * // case PlusToken => ParseResult(PlusOp(), position + 1)
+     * // case MinusToken => ParseResult(MinusOp(), position + 1)
+     * // ...
+     * // }
+     * if (token instanceof PlusToken) {
+     * return new ParseResult<Op>(new PlusOp(), position + 1);
+     * } else if (token instanceof MinusToken) {
+     * return new ParseResult<Op>(new MinusOp(), position + 1);
+     * } else if (token instanceof LessThanToken) {
+     * return new ParseResult<Op>(new LessThanOp(), position + 1);
+     * } else if (token instanceof EqualsToken) {
+     * return new ParseResult<Op>(new EqualsOp(), position + 1);
+     * } else {
+     * throw new ParseException("expected operator; received: " + token);
+     * }
+     * }
+     * 
+     * // recursive descent parsing can't handle a grammar with left-recursion
+     * // exp ::= x | i | exp op exp
+     * // ^ ^
+     * // | |
+     * // left |
+     * // right
+     * public ParseResult<Exp> parseExp(final int position) throws ParseException {
+     * final Token token = getToken(position);
+     * if (token instanceof VariableToken) {
+     * final String name = ((VariableToken)token).name;
+     * return new ParseResult<Exp>(new VariableExp(name), position + 1);
+     * } else if (token instanceof IntegerToken) {
+     * final int value = ((IntegerToken)token).value;
+     * return new ParseResult<Exp>(new IntegerExp(value), position + 1);
+     * } else {
+     * // Issue #1: operator precedence
+     * // Issue #2: ??? - hint: this is recursive code
+     * // Have base cases, have a recursive case.
+     * final ParseResult<Exp> left = parseExp(position);
+     * final ParseResult<Op> op = parseOp(left.position);
+     * final ParseResult<Exp> right = parseExp(op.position);
+     * return new ParseResult<Exp>(new OpExp(left.result,
+     * op.result,
+     * right.result),
+     * right.position);
+     * }
+     * }
+     */
 }

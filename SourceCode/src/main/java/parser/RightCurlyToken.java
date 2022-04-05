@@ -1,22 +1,15 @@
 package parser;
 
 public class RightCurlyToken implements Token {
-    public final String name;
-
-    public RightCurlyToken(final String name) {
-        this.name = name;
-    }
-
     public boolean equals(final Object other) {
-        return (other instanceof RightCurlyToken &&
-                name.equals(((RightCurlyToken) other).name));
+        return other instanceof RightCurlyToken;
     }
 
     public int hashCode() {
-        return name.hashCode();
+        return 9;
     }
-
+    
     public String toString() {
-        return "RightCurlyToken(" + name + ")";
+        return "RightCurlyToken";
     }
 }
