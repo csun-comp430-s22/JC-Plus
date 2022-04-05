@@ -77,11 +77,16 @@ public class Parser {
             assertTokenHereIs(inParens.position, new RightParenToken());
             return new ParseResult<Exp>(inParens.result,
                                         inParens.position + 1);
+        } else if (token instanceof LeftBracketToken) {
+            final ParseResult<Exp> inParens = parseExp(position + 1);
+            assertTokenHereIs(inParens.position, new RightBracketToken());
+            return new ParseResult<Exp>(inParens.result,
+                                        inParens.position + 1);
         }
     } // parsePrimaryExp
 
 
-        // secondary_exp ::= this | len | new | type | `[` exp `]`
+        // secondary_exp ::= this | len | new | type 
         public ParseResult<Exp> parseSecondaryExp(final int position) throws ParseException {
             final Token token = getToken(position);
             if(token instanceof ThisToken) {
@@ -100,13 +105,8 @@ public class Parser {
                 final String name = ((TypeToken)token).name;
                 return new ParseResult<Exp>(new TypeExp(name), position + 1);
             } 
-            else if (token instanceof LeftBracketToken) {
-                final ParseResult<Exp> inParens = parseExp(position + 1);
-                assertTokenHereIs(inParens.position, new RightBracketToken());
-                return new ParseResult<Exp>(inParens.result,
-                                            inParens.position + 1);
-            }
-        } // parsePrimaryExp
+            
+        } // parseSecondaryExp
     
       
 

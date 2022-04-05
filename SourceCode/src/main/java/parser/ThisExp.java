@@ -1,15 +1,15 @@
 package parser;
 
-public class WhileToken implements Token {
+public class ThisExp implements Exp {
     public final String name;
 
-    public WhileToken(final String name) {
+    public ThisExp(final String name) {
         this.name = name;
     }
 
     public boolean equals(final Object other) {
-        return (other instanceof WhileToken &&
-                name.equals(((WhileToken) other).name));
+        return (other instanceof ThisExp &&
+                name.equals(((ThisExp) other).name));
     }
 
     public int hashCode() {
@@ -17,6 +17,6 @@ public class WhileToken implements Token {
     }
 
     public String toString() {
-        return "WhileToken(" + name + ")";
+        return "ThisExp(" + name + ")";
     }
 }
