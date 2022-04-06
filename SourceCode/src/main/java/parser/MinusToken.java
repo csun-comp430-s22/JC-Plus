@@ -1,22 +1,17 @@
 package parser;
 
 public class MinusToken implements Token {
-    public final String name;
 
-    public MinusToken(final String name) {
-        this.name = name;
+    public boolean equals(final Object other) { // logic to make equals work for each token
+        return other instanceof MinusToken;
     }
 
-    public boolean equals(final Object other) {
-        return (other instanceof MinusToken &&
-                name.equals(((MinusToken) other).name));
-    }
-
-    public int hashCode() {
-        return name.hashCode();
+    public int hashCode() { // if two objects are not equal to eachother they will not return the same
+                            // hashcode
+        return 8;
     }
 
     public String toString() {
-        return "MinusToken(" + name + ")";
+        return "MinusToken";
     }
 }

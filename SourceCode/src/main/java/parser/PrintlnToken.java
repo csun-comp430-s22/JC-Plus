@@ -1,22 +1,17 @@
 package parser;
 
 public class PrintlnToken implements Token {
-    public final String name;
 
-    public PrintlnToken(final String name) {
-        this.name = name;
+    public boolean equals(final Object other) { // logic to make equals work for each token
+        return other instanceof PrintlnToken;
     }
 
-    public boolean equals(final Object other) {
-        return (other instanceof PrintlnToken &&
-                name.equals(((PrintlnToken) other).name));
-    }
-
-    public int hashCode() {
-        return name.hashCode();
+    public int hashCode() { // if two objects are not equal to eachother they will not return the same
+                            // hashcode
+        return 6;
     }
 
     public String toString() {
-        return "PrintlnToken(" + name + ")";
+        return "PrintlnToken";
     }
 }

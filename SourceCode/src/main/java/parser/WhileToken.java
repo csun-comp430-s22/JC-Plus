@@ -1,22 +1,17 @@
 package parser;
 
 public class WhileToken implements Token {
-    public final String name;
 
-    public WhileToken(final String name) {
-        this.name = name;
+    public boolean equals(final Object other) { // logic to make equals work for each token
+        return other instanceof WhileToken;
     }
 
-    public boolean equals(final Object other) {
-        return (other instanceof WhileToken &&
-                name.equals(((WhileToken) other).name));
-    }
-
-    public int hashCode() {
-        return name.hashCode();
+    public int hashCode() { // if two objects are not equal to eachother they will not return the same
+                            // hashcode
+        return 13;
     }
 
     public String toString() {
-        return "WhileToken(" + name + ")";
+        return "WhileToken";
     }
 }

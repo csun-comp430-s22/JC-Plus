@@ -102,22 +102,21 @@ public class Parser {
                                           // this.variableName
             final String name = ((ThisToken) token).name;
             return new ParseResult<Exp>(new ThisExp(name), position + 1);
-        } else if (token instanceof LenToken) { // len(exp);
+        } else if (token instanceof LengthToken) { // len(exp);
             assertTokenHereIs(position + 1, new LeftParenToken());
             final ParseResult<Exp> exp = parseExp(position + 2);
             assertTokenHereIs(exp.position, new RightParenToken());
             assertTokenHereIs(exp.position + 1, new SemicolonToken());
-            return new ParseResult<Exp>(new LenExp(exp.result),
+            return new ParseResult<Exp>(new LengthExp(exp.result),
                     exp.position + 2);
         } else if (token instanceof NewToken) { // new type[exp]
-            assertTokenHereIs(position + 2, new TypeToken()); // +2 because we are skipping whitespace; new TypeToken??
-            final ParseResult<Type> type = parseType(position + 2); // this should be the type right?
+            final ParseResult<Type> type = parseType(position + 1); // this should be the type right?, no create parse type function, create based on proposal
             assertTokenHereIs(type.position, new LeftBracketToken());
             final ParseResult<Exp> exp = parseExp(type.position + 2);
             assertTokenHereIs(exp.position + 1, new parser.RightBracketToken());
             return new ParseResult<Exp>(new NewExp(exp.result),
                     exp.position + 2);
-        } else if (token instanceof ExpToken) { /// exp.methodname(exp*) ???
+        } else if (token instanceof ExpToken) { /// exp.methodname(exp*) ??? modify grammar so no infinte loop
             final ParseResult<Exp> exp = parseExp(position);
             assertTokenHereIs(exp.position + 1, new DotToken());
             final ParseResult<MethodName> methodName = parseMethodName(exp.position + 2);
@@ -284,7 +283,7 @@ public class Parser {
     public ParseResult<Stmt> parseVardec(final int position) throws ParseException {
         final Token token = getToken(position);
         // if
-        if (token instanceof TypeToken) {
+        if (token instanceof TypeToken) {  //parse type function and then check if next position is variable
             assertTokenHereIs(position + 2, new VariableToken()); // skipping whitespace??
             // TODO something should be here??
 
@@ -354,7 +353,7 @@ public class Parser {
             return new ParseResult<Stmt>(new PrintlnStmt(exp.result),
                     exp.position + 2);
         } else if (token instanceof VariableToken) { 
-            if (true) {  // var[exp] = exp; //TODO: change true to a statement that will have 
+            if (true) {  // var[exp] = exp; //TODO: change true to a statement that will have ,, we can use nested conditionals
                 //leftBracketToken after position 1
                 assertTokenHereIs(position + 1, new parser.LeftBracketToken());
                 final ParseResult<Exp> exp = parseExp(position + 3);

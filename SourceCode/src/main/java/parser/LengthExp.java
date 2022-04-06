@@ -1,9 +1,9 @@
 package parser;
 
-public class LenExp implements Exp {
+public class LengthExp implements Exp {
     public final Exp exp;
 
-    public LenExp(final Exp exp) {
+    public LengthExp(final Exp exp) {
         this.exp = exp;
     }
 
@@ -12,8 +12,8 @@ public class LenExp implements Exp {
     }
 
     public boolean equals(final Object other) {
-        return (other instanceof LenExp &&
-                exp.equals(((LenExp) other).exp));
+        return (other instanceof LengthExp &&
+                exp.equals(((LengthExp) other).exp));
     }
 
     public String toString() {

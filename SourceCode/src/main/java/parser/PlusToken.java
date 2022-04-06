@@ -1,22 +1,17 @@
 package parser;
 
 public class PlusToken implements Token {
-    public final String name;
 
-    public PlusToken(final String name) {
-        this.name = name;
+    public boolean equals(final Object other) { // logic to make equals work for each token
+        return other instanceof PlusToken;
     }
 
-    public boolean equals(final Object other) {
-        return (other instanceof PlusToken &&
-                name.equals(((PlusToken) other).name));
-    }
-
-    public int hashCode() {
-        return name.hashCode();
+    public int hashCode() { // if two objects are not equal to eachother they will not return the same
+                            // hashcode
+        return 7;
     }
 
     public String toString() {
-        return "PlusToken(" + name + ")";
+        return "PlusToken";
     }
 }

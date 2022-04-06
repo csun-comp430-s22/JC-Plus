@@ -1,22 +1,17 @@
 package parser;
 
 public class MultiplicationToken implements Token {
-    public final String name;
 
-    public MultiplicationToken(final String name) {
-        this.name = name;
+    public boolean equals(final Object other) { // logic to make equals work for each token
+        return other instanceof MultiplicationToken;
     }
 
-    public boolean equals(final Object other) {
-        return (other instanceof MultiplicationToken &&
-                name.equals(((MultiplicationToken) other).name));
-    }
-
-    public int hashCode() {
-        return name.hashCode();
+    public int hashCode() { // if two objects are not equal to eachother they will not return the same
+                            // hashcode
+        return 9;
     }
 
     public String toString() {
-        return "MultiplicationToken(" + name + ")";
+        return "MultiplicationToken";
     }
 }

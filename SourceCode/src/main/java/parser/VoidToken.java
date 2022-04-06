@@ -1,22 +1,17 @@
 package parser;
 
 public class VoidToken implements Token {
-    public final String name;
 
-    public VoidToken(final String name) {
-        this.name = name;
+    public boolean equals(final Object other) { // logic to make equals work for each token
+        return other instanceof VoidToken;
     }
 
-    public boolean equals(final Object other) {
-        return (other instanceof VoidToken &&
-                name.equals(((VoidToken)other).name));
-    }
-
-    public int hashCode() {
-        return name.hashCode();
+    public int hashCode() { // if two objects are not equal to eachother they will not return the same
+                            // hashcode
+        return 16;
     }
 
     public String toString() {
-        return "VoidToken(" + name + ")";
+        return "VoidToken";
     }
 }

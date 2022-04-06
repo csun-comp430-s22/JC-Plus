@@ -1,22 +1,17 @@
 package parser;
 
 public class NewToken implements Token {
-    public final String name;
 
-    public NewToken(final String name) {
-        this.name = name;
+    public boolean equals(final Object other) { // logic to make equals work for each token
+        return other instanceof NewToken;
     }
 
-    public boolean equals(final Object other) {
-        return (other instanceof NewToken &&
-                name.equals(((NewToken) other).name));
-    }
-
-    public int hashCode() {
-        return name.hashCode();
+    public int hashCode() { // if two objects are not equal to eachother they will not return the same
+                            // hashcode
+        return 20;
     }
 
     public String toString() {
-        return "NewToken(" + name + ")";
+        return "NewToken";
     }
 }
