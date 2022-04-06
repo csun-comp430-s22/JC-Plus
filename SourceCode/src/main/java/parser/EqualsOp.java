@@ -6,7 +6,7 @@ public class EqualsOp implements Op {
     }
 
     public int hashCode() {
-        return 3;
+        return 25;
     }
 
     public String toString() {
