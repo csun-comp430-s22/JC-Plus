@@ -11,27 +11,27 @@ public class ArrayAssignment implements Stmt {
         this.assignThis = assignThis;
     }
 
-public boolean equals(final Object other) {
-if (other instanceof ArrayAssignment) {
-final ArrayAssignment otherExp = (ArrayAssignment)other;
-return (variable.equals(otherExp.variable) &&
-       index.equals(otherExp.index) &&
-       assignThis.equals(otherExp.assignThis));
-} else {
-return false;
-}
-}
+    public boolean equals(final Object other) {
+        if (other instanceof ArrayAssignment) {
+            final ArrayAssignment otherExp = (ArrayAssignment) other;
+            return (variable.equals(otherExp.variable) &&
+                    index.equals(otherExp.index) &&
+                    assignThis.equals(otherExp.assignThis));
+        } else {
+            return false;
+        }
+    }
 
-public int hashCode() {
-return (variable.hashCode() +
-   index.hashCode() +
-   assignThis.hashCode());
-}
+    public int hashCode() {
+        return (variable.hashCode() +
+                index.hashCode() +
+                assignThis.hashCode());
+    }
 
-public String toString() {
-return ("ArrayAssignment(" +
-   variable.toString() + ", " +
-   index.toString() + ", " +
-   assignThis.toString() + ")");
-}
+    public String toString() {
+        return ("ArrayAssignment(" +
+                variable.toString() + ", " +
+                index.toString() + ", " +
+                assignThis.toString() + ")");
+    }
 }

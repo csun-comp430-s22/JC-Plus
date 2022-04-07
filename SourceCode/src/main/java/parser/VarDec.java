@@ -2,10 +2,10 @@ package parser;
 
 public class VarDec {
     public final Type type;
-    public final VariableExp variable;
+    public final VariableToken variable;
 
     public VarDec(final Type type,
-                  final VariableExp variable) {
+                  final VariableToken variable) {
         this.type = type;
         this.variable = variable;
     }
