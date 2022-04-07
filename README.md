@@ -37,9 +37,9 @@ exp ::= var | integer |  // Variables and integers are expressions
         exp.methodname(exp*) | // Calls a method
         new classname(exp*) | // Creates a new instance of a class
 
-vardec ::= type var | // Variable declaration
+vardec ::= type var | // Variable initilization
 
-stmt ::= 	vardec = exp; | // Variable declaration and assignment
+stmt ::= 	vardec = exp; | // Variable initialization and assignment
 		      { stmt*; } | // block of code with several statements
           var = exp; | // Assignment 
           `println` `(` `exp` `)` | // Prints something to the terminal
