@@ -362,7 +362,7 @@ public class Parser {
             assertTokenHereIs(methodName.position, new LeftParenToken());
             final ParseResult<Exp> exp2 = parseExp(exp.position + 2);
             assertTokenHereIs(exp.position + 1, new RightParenToken());
-            return new ParseResult<Stmt>(new ExpMethodNameStmt(exp.result), // Implement exp.methodname stmt???
+            return new ParseResult<Stmt>(new ExpMethodNameStmt(exp.result), // Implement exp.methodname stmt??
                     exp.position + 2);
         } else {
             throw new ParseException("expected statement; received: " + token);
