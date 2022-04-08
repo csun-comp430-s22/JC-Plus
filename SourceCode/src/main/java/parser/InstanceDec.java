@@ -1,18 +1,14 @@
 package parser;
 
 
-public class VarDecStmt implements Stmt {
+public class InstanceDec implements Stmt {
     public final VarDec vardec;
     public final Exp exp;
 
-    public VarDecStmt(final VarDec vardec,
+    public InstanceDec(final VarDec vardec,
                       final Exp exp) {
         this.vardec = vardec;
         this.exp = exp;
-    }
-
-    public VarDec getVarDec() {
-        return vardec;
     }
 
     public int hashCode() {
@@ -20,8 +16,8 @@ public class VarDecStmt implements Stmt {
     }
 
     public boolean equals(final Object other) {
-        if (other instanceof VarDecStmt) {
-            final VarDecStmt otherStmt = (VarDecStmt)other;
+        if (other instanceof InstanceDec) {
+            final InstanceDec otherStmt = (InstanceDec)other;
             return (vardec.equals(otherStmt.vardec) &&
                     exp.equals(otherStmt.exp));
         } else {
@@ -30,7 +26,7 @@ public class VarDecStmt implements Stmt {
     }
 
     public String toString() {
-        return ("VarDecStmt(" + vardec.toString() + ", " +
+        return ("InstanceDec(" + vardec.toString() + ", " +
                 exp.toString() + ")");
     }
 }

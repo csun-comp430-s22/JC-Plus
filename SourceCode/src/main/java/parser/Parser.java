@@ -39,6 +39,7 @@ import java.util.List;
 import lexer.LeftBracketToken;
 import lexer.RightBracketToken;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 
 public class Parser {
@@ -68,9 +69,9 @@ public class Parser {
         final Token token = getToken(position);
         if (token instanceof Variable) {
             final String name = ((Variable) token).name;
-            return new ParseResult<Exp>(new VariableExp(name), position + 1);
-        } else if (token instanceof IntegerLiteralToken) {
-            final int value = ((IntegerLiteralToken) token).value;
+            return new ParseResult<Exp>(new VariableExp(new Variable(name)), position + 1);
+        } else if (token instanceof IntLiteralToken) {
+            final int value = ((IntLiteralToken) token).value;
             return new ParseResult<Exp>(new IntLiteralExp(value), position + 1);
         } else if (token instanceof LeftParenToken) {
             final ParseResult<Exp> inParens = parseExp(position + 1);
@@ -96,7 +97,7 @@ public class Parser {
         return parseEqualsExp(position);
     }
 
-    // secondary_exp ::= this | len(exp); | new type[exp] | type
+    // secondary_exp ::= this | len(exp); | new type[exp] | exp.methodname(exp*)
     public ParseResult<Exp> parseSecondaryExp(final int position) throws ParseException {
         final Token token = getToken(position);
         if (token instanceof ThisToken) { // this | might need to change so its used to do something like
@@ -116,23 +117,23 @@ public class Parser {
             assertTokenHereIs(type.position, new parser.LeftBracketToken());
             final ParseResult<Exp> exp = parseExp(type.position + 2);
             assertTokenHereIs(exp.position + 1, new parser.RightBracketToken());
-            return new ParseResult<Exp>(new NewExp(exp.result),
+            return new ParseResult<Exp>(new NewArrayDeclarationExp(type.result, exp.result),
                     exp.position + 2);
-        } else if (token instanceof ExpToken) { /// exp.methodname(exp*) ??? modify grammar so no infinte loop
-            final ParseResult<Exp> exp = parseExp(position);
-            assertTokenHereIs(exp.position + 1, new DotToken());
-            final ParseResult<MethodName> methodName = parseMethodName(exp.position + 2);
-            assertTokenHereIs(methodName.position, new LeftParenToken());
-            final ParseResult<Exp> exp2 = parseExp(exp.position + 2);
-            assertTokenHereIs(exp.position + 1, new RightParenToken());
-            return new ParseResult<Stmt>(new ExpMethodNameStmt(exp.result), // Implement exp.methodname stmt???
-                    exp.position + 2);
-        } else if (token instanceof TypeToken) {
-            final String name = ((TypeToken) token).name;
-            return new ParseResult<Exp>(new TypeExp(name), position + 1);
+        } else {
+            throw new ParseException("Expected secondary expression; received: " + token);
         }
 
     } // parseSecondaryExp
+
+    // parsemethodName ::= methodName |
+    public ParseResult<MethodName> parseMethodName(final int position) throws ParseException {
+        final Token token = getToken(position);
+        if (token instanceof MethodName) {
+            return new ParseResult<MethodName>(new MethodName(token.toString()), position + 1);
+        } else {
+            throw new ParseException("expected Int or Void; received: " + token);
+        }
+    } // parsemethodName
 
     // additive_op ::= + | - | * | /
     public ParseResult<Op> parseAdditiveOp(final int position) throws ParseException {
@@ -234,9 +235,7 @@ public class Parser {
         return current;
     } // parseEqualsExp
 
-
-
-    // parse_type ::= Int | 
+    // parse_type ::= Int |
     public ParseResult<Type> parseType(final int position) throws ParseException {
         final Token token = getToken(position);
         if (token instanceof VoidToken) {
@@ -247,30 +246,30 @@ public class Parser {
             throw new ParseException("expected Int or Void; received: " + token);
         }
     } // parseType
-        // parse_Variable ::= var | 
-        public ParseResult<Variable> parseVariableExp(final int position) throws ParseException {
-            final Token token = getToken(position);
-            if (token instanceof VariableExp) {
-                return new ParseResult<Variable>(new Variable (token.toString()), position + 1);
-            } else {
-                throw new ParseException("expected Variable; received: " + token);
-            }
-        } // parseVariable
-    
+      // parse_Variable ::= var |
 
+    public ParseResult<Variable> parseVariableExp(final int position) throws ParseException {
+        final Token token = getToken(position);
+        if (token instanceof VariableExp) {
+            return new ParseResult<Variable>(new Variable(token.toString()), position + 1);
+        } else {
+            throw new ParseException("expected Variable; received: " + token);
+        }
+    } // parseVariable
 
     // type var
     public ParseResult<Stmt> parseVardec(final int position) throws ParseException {
         final Token token = getToken(position);
         // if Int x ; = "husdhu";
         if (token instanceof TypeToken) { // parse type function and then check if next position is variable
-           // assertTokenHereIs(position + 2, new VariableToken()); // skipping whitespace??
+            // assertTokenHereIs(position + 2, new VariableToken()); // skipping
+            // whitespace??
             // TODO something should be here??
             final ParseResult<Type> type = parseType(position);
-            final ParseResult<Variable> variable = parseVariableExp(type.position+2); 
-            VarDec a = new VarDec(type.result,variable.result);  
-            return new ParseResult<Stmt>(new VarDecStmt(a,new IntLiteralExp(0)), variable.position);
-           
+            final ParseResult<Variable> variable = parseVariableExp(type.position + 2);
+            VarDec a = new VarDec(type.result, variable.result);
+            return new ParseResult<Stmt>(new VarDecStmt(a, new IntLiteralExp(0)), variable.position);
+
             /*
              * assertTokenHereIs(guard.position, new RightParenToken());
              * final ParseResult<Stmt> trueBranch = parseStmt(guard.position + 1);
@@ -310,7 +309,7 @@ public class Parser {
             final ParseResult<Stmt> body = parseStmt(guard.position + 1);
             return new ParseResult<Stmt>(new WhileStmt(guard.result,
                     body.result), body.position);
-                
+
         } else if (token instanceof LeftCurlyToken) {
             final List<Stmt> stmts = new ArrayList<Stmt>();
             int curPosition = position + 1;
@@ -334,7 +333,8 @@ public class Parser {
             return new ParseResult<Stmt>(new PrintlnStmt(exp.result),
                     exp.position + 2);
         } else if (token instanceof Variable) {
-            if (getToken(position+1) instanceof LeftBracketToken) { // var[exp] = exp; //TODO: change true to a statement that will have ,, we can
+            if (getToken(position + 1) instanceof LeftBracketToken) { // var[exp] = exp; //TODO: change true to a
+                                                                      // statement that will have ,, we can
                 // use nested conditionals
                 // leftBracketToken after position 1
                 assertTokenHereIs(position + 1, new parser.LeftBracketToken());
@@ -343,38 +343,56 @@ public class Parser {
                 assertTokenHereIs(position + 1, new EqualsToken());
                 final ParseResult<Exp> exp2 = parseExp(position + 3);
                 assertTokenHereIs(exp2.position + 1, new SemicolonToken());
-                return new ParseResult<Stmt>(new AssignmentStmt(new Variable(token.toString()),exp2.result),
+                return new ParseResult<Stmt>(new AssignmentStmt(new Variable(token.toString()), exp2.result),
                         exp2.position + 2);
             } else { // var = exp;
                 assertTokenHereIs(position + 2, new EqualsToken()); // +2 because we are skipping whitespace
                 final ParseResult<Exp> exp = parseExp(position + 3);
                 assertTokenHereIs(exp.position + 1, new SemicolonToken());
-                return new ParseResult<Stmt>(new AssignmentStmt(new Variable(token.toString()),exp.result),
+                return new ParseResult<Stmt>(new AssignmentStmt(new Variable(token.toString()), exp.result),
                         exp.position + 2);
             }
-        } else if (token instanceof ReturnToken) { 
-            if(getToken(position +2)instanceof Exp){ // return exp
-            final ParseResult<Exp> exp = parseExp(position + 2); // +2 because we are skipping 1 whitespace
-            assertTokenHereIs(exp.position + 1, new SemicolonToken());
-            return new ParseResult<Stmt>(new ReturnNonVoidStmt(exp.result),
-                    exp.position + 2);
-            }else if (token instanceof ReturnToken) { // return;
-                        assertTokenHereIs(position + 1, new SemicolonToken());
-                        return new ParseResult<Stmt>(new ReturnVoidStmt(),
-                                position+2);
-                    }
-        } else if (token instanceof Exp) { /// exp.methodname(exp*)
+        } else if (token instanceof ReturnToken) {
+            if (getToken(position + 2) instanceof Exp) { // return exp
+                final ParseResult<Exp> exp = parseExp(position + 2); // +2 because we are skipping 1 whitespace
+                assertTokenHereIs(exp.position + 1, new SemicolonToken());
+                return new ParseResult<Stmt>(new ReturnNonVoidStmt(exp.result),
+                        exp.position + 2);
+            } else if (token instanceof ReturnToken) { // return;
+                assertTokenHereIs(position + 1, new SemicolonToken());
+                return new ParseResult<Stmt>(new ReturnVoidStmt(),
+                        position + 2);
+            } else {
+                throw new ParseException("expected return statement; received: " + token);
+            }
+        } else if (token instanceof Exp) { /// exp.methodname(exp*) ??? modify grammar so no infinte loop
             final ParseResult<Exp> exp = parseExp(position);
             assertTokenHereIs(exp.position + 1, new DotToken());
             final ParseResult<MethodName> methodName = parseMethodName(exp.position + 2);
             assertTokenHereIs(methodName.position, new LeftParenToken());
-            final ParseResult<Exp> exp2 = parseExp(exp.position + 2);
+
+            final List<Exp> exps = new ArrayList<Exp>();
+            int curPosition = position + 1;
+            boolean shouldRun = true;
+            while (shouldRun) {
+                try {
+                    final ParseResult<Exp> tempExp = parseExp(curPosition);
+                    exps.add(tempExp.result);
+                    curPosition = tempExp.position;
+                } catch (final ParseException e) {
+                    shouldRun = false;
+                }
+            }
+
             assertTokenHereIs(exp.position + 1, new RightParenToken());
-            return new ParseResult<Stmt>(new ExpMethodNameStmt(exp.result), // Implement exp.methodname stmt?????
+            return new ParseResult<Stmt>(new ExpMethodNameStmt(exp.result, methodName.result, exps), // Implement
+                                                                                                     // exp.methodname
+                                                                                                     // stmt???
                     exp.position + 2);
         } else {
             throw new ParseException("expected statement; received: " + token);
         }
+
     } // parseStmt
 
     // type methodname( vardec*) stmt
@@ -383,26 +401,28 @@ public class Parser {
         // type
         if (token instanceof TypeToken) { // type methodname( vardec* ) stmt
             final ParseResult<Type> type = parseType(position);
-            String a = getToken(position+2).toString();
+            String a = getToken(position + 2).toString();
             MethodName name = new MethodName(a);
-            assertTokenHereIs(position+3, new LeftParenToken());
+            assertTokenHereIs(position + 3, new LeftParenToken());
             final List<VarDec> stmts = new ArrayList<VarDec>();
             int curPosition = position + 4;
             boolean shouldRun = true;
             while (shouldRun) {
                 try {
                     final ParseResult<Stmt> vardec = parseVardec(curPosition);
-                    stmts.add( new VarDec(type.result,new Variable(vardec.result.toString())));  
+                    stmts.add(new VarDec(type.result, new Variable(vardec.result.toString())));
                     curPosition = vardec.position;
                 } catch (final ParseException e) {
                     shouldRun = false;
                 }
             }
-      
+
             assertTokenHereIs(curPosition, new RightParenToken());
             final ParseResult<Stmt> stmt = parseStmt(curPosition + 1);
             // TODO: add something here
-            return new ParseResult<MethodDef>(new MethodDef(type.result,name,stmts,stmt.result), // Implement exp.methodname stmt?????
+            return new ParseResult<MethodDef>(new MethodDef(type.result, name, stmts, stmt.result), // Implement
+                                                                                                    // exp.methodname
+                                                                                                    // stmt?????
                     curPosition + 2);
         } else {
             throw new ParseException("expected MethodDef; received: " + token);
@@ -410,44 +430,137 @@ public class Parser {
     } // parseMethodDef
 
     // instancedec
-    public ParseResult<Stmt> parseInstancedec(final int position) throws ParseException {
-            final Token token = getToken(position);
-            // if Int x ; = "husdhu";
-            if (token instanceof TypeToken) { // parse type function and then check if next position is variable
-               // assertTokenHereIs(position + 2, new VariableToken()); // skipping whitespace??
-                // TODO something should be here??
-                final ParseResult<Type> type = parseType(position);
-                final ParseResult<Variable> variable = parseVariableExp(type.position+2); 
-                VarDec a = new VarDec(type.result,variable.result);  
-                return new ParseResult<Stmt>(new VarDecStmt(a,new IntLiteralExp(0)), variable.position);
-               
-                /*
-                 * assertTokenHereIs(guard.position, new RightParenToken());
-                 * final ParseResult<Stmt> trueBranch = parseStmt(guard.position + 1);
-                 * assertTokenHereIs(trueBranch.position, new ElseToken());
-                 * final ParseResult<Stmt> falseBranch = parseStmt(trueBranch.position + 1);
-                 * return new ParseResult<Stmt>(new IfExp(guard.result,
-                 * trueBranch.result,
-                 * falseBranch.result),
-                 * falseBranch.position);
-                 */
-    
-            } else {
-                throw new ParseException("expected Instancedec; received: " + token);
-            }
-        } // parseInstancedec
+    // vardec
+    public ParseResult<VarDec> parseInstancedec(final int position) throws ParseException {
+        final Token token = getToken(position);
+        // if Int x ; = "husdhu";
+        if (token instanceof VarDec) { // parse type function and then check if next position is variable
+            // assertTokenHereIs(position + 2, new VariableToken()); // skipping
+            // whitespace??
+            // TODO something should be here??
+            final ParseResult<Type> type = parseType(position);
+            final ParseResult<Variable> variable = parseVariableExp(type.position + 2);
+            // VarDec a = new VarDec(type.result, variable.result);
+            return new ParseResult<VarDec>(new VarDec(type.result, variable.result), variable.position);
+
+            /*
+             * assertTokenHereIs(guard.position, new RightParenToken());
+             * final ParseResult<Stmt> trueBranch = parseStmt(guard.position + 1);
+             * assertTokenHereIs(trueBranch.position, new ElseToken());
+             * final ParseResult<Stmt> falseBranch = parseStmt(trueBranch.position + 1);
+             * return new ParseResult<Stmt>(new IfExp(guard.result,
+             * trueBranch.result,
+             * falseBranch.result),
+             * falseBranch.position);
+             */
+
+        } else {
+            throw new ParseException("expected Instancedec; received: " + token);
+        }
+    } // parseInstancedec
+
+    // parse_class ::= className |
+    public ParseResult<ClassName> parseClass(final int position) throws ParseException {
+        final Token token = getToken(position);
+        if (token instanceof ClassToken) {
+            return new ParseResult<ClassName>(new ClassName(token.toString()), position + 1);
+        } else {
+            throw new ParseException("expected className; received: " + token);
+        }
+    } // parseClass
 
     // classdef
-    public ParseResult<Stmt> parseClassdef(final int position) throws ParseException {
+    public ParseResult<ClassDef> parseClassdef(final int position) throws ParseException {
         final Token token = getToken(position);
 
         // type
-        if (token instanceof ClassToken) { // type methodname( vardec* ) stmt
+        if (token instanceof ClassToken) { // class classname extends classname
+            // { instancedec*
+            // constructor(vardec*) stmt* // vardecs are comma-sep
+            // methoddef* }
 
-            // TODO: add something here
+            final ParseResult<ClassName> className = parseClass(position + 2); // skip whitespace after class
+            assertTokenHereIs(className.position + 1, new ExtendsToken());
+            final ParseResult<ClassName> extendsClassName = parseClass(className.position + 2);
+
+            assertTokenHereIs(className.position + 3, new parser.LeftBracketToken());
+
+            // instancedec*
+            final List<VarDec> instanceVariables = new ArrayList<VarDec>();
+            int curPosition = position + 4;
+            boolean shouldRun = true;
+            while (shouldRun) {
+                try {
+                    final ParseResult<VarDec> vardec = parseInstancedec(curPosition);
+
+                    Type type = vardec.result.type;
+                    instanceVariables.add(new VarDec(type, new Variable(vardec.result.toString())));
+                    curPosition = vardec.position;
+                } catch (final ParseException e) {
+                    shouldRun = false;
+                }
+            } // instancedec*
+
+            assertTokenHereIs(curPosition + 1, new ClassToken());
+            final ParseResult<ClassName> constructorName = parseClass(className.position + 2);
+            assertTokenHereIs(constructorName.position + 1, new LeftParenToken());
+
+            // vardec*
+            final List<VarDec> constructorArguments = new ArrayList<VarDec>();
+            curPosition = constructorName.position + 2;
+            shouldRun = true;
+            while (shouldRun) {
+                try {
+                    final ParseResult<VarDec> vardec = parseInstancedec(curPosition);
+
+                    Type type = vardec.result.type;
+                    constructorArguments.add(new VarDec(type, new Variable(vardec.result.toString())));
+                    curPosition = vardec.position;
+                } catch (final ParseException e) {
+                    shouldRun = false;
+                }
+            } // vardec*
+
+            assertTokenHereIs(curPosition + 1, new RightParenToken());
+
+            // stmt*
+            final List<Stmt> superBody = new ArrayList<Stmt>();
+            curPosition = position + 2;
+            shouldRun = true;
+            while (shouldRun) {
+                try {
+                    final ParseResult<Stmt> stmt = parseStmt(curPosition);
+                    superBody.add(stmt.result);
+                    curPosition = stmt.position;
+                } catch (final ParseException e) {
+                    shouldRun = false;
+                }
+            } // stmt*
+
+            // methodDef*
+            final List<MethodDef> methods = new ArrayList<MethodDef>();
+            curPosition = position + 1;
+            shouldRun = true;
+            while (shouldRun) {
+                try {
+                    final ParseResult<MethodDef> method = parseMethodDef(curPosition);
+
+                    // Type type = vardec.result.type;
+                    methods.add(method.result);
+                    curPosition = method.position;
+                } catch (final ParseException e) {
+                    shouldRun = false;
+                }
+            } // methodDef*
+
+            return new ParseResult<ClassDef>(new ClassDef(className.result, extendsClassName.result, instanceVariables,
+                    constructorArguments, superBody, methods), // Implement
+                                                               // exp.methodname
+                                                               // stmt?????
+                    curPosition + 2);
 
         } else {
-            throw new ParseException("expected statement; received: " + token);
+            throw new ParseException("expected classDef; received: " + token);
         }
     } // parseClassdef
 
