@@ -1,22 +1,33 @@
 package parser;
 
-public class NewExp implements Exp {
-    public final Exp exp;
+import java.util.List;
 
-    public NewExp(final Exp exp) {
-        this.exp = exp;
+public class NewExp implements Exp {
+    public final ClassName className;
+    public final List<Exp> params;
+
+    public NewExp(final ClassName className,
+                  final List<Exp> params) {
+        this.className = className;
+        this.params = params;
     }
 
     public int hashCode() {
-        return exp.hashCode();
+        return className.hashCode() + params.hashCode();
     }
 
     public boolean equals(final Object other) {
-        return (other instanceof NewExp &&
-                exp.equals(((NewExp) other).exp));
+        if (other instanceof NewExp) {
+            final NewExp otherNew = (NewExp)other;
+            return (className.equals(otherNew.className) &&
+                    params.equals(otherNew.params));
+        } else {
+            return false;
+        }
     }
 
     public String toString() {
-        return "NewExp(" + exp.toString() + ")";
+        return ("NewExp(" + className.toString() + ", " +
+                params.toString() + ")");
     }
 }

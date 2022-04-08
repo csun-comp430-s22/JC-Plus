@@ -22,7 +22,7 @@ integer is a number
 methodname is the name of a method
 classname is a class name
 
-type::= Int | Void | type[] |  // Built-in types
+type::= Int | Void | Int[] |  // Built-in types
  	      classname class type; // includes Object and String
 
 op ::= + | - | * | /  // Arithmetic operations

@@ -1,10 +1,10 @@
 package parser;
 
 public class AssignmentStmt implements Stmt {
-    public final VariableToken var;
+    public final Variable var;
     public final Exp exp;
 
-    public AssignmentStmt(final VariableToken var,
+    public AssignmentStmt(final Variable var,
             final Exp exp) {
         this.var = var;
         this.exp = exp;

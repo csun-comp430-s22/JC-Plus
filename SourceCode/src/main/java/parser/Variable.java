@@ -1,15 +1,15 @@
 package parser;
 
-public class VoidExp implements Exp {
+public class Variable implements Token {
     public final String name;
 
-    public VoidExp(final String name) {
+    public Variable(final String name) {
         this.name = name;
     }
 
     public boolean equals(final Object other) {
-        return (other instanceof VoidExp &&
-                name.equals(((VoidExp) other).name));
+        return (other instanceof Variable &&
+                name.equals(((Variable)other).name));
     }
 
     public int hashCode() {
@@ -17,6 +17,6 @@ public class VoidExp implements Exp {
     }
 
     public String toString() {
-        return "VoidExp(" + name + ")";
+        return "VariableToken(" + name + ")";
     }
 }
