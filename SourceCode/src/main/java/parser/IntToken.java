@@ -1,22 +1,17 @@
 package parser;
 
 public class IntToken implements Token {
-    public final int value;
 
-    public IntToken(final int value) {
-        this.value = value;
+    public boolean equals(final Object other) { // logic to make equals work for each token
+        return other instanceof IntToken;
     }
 
-    public boolean equals(final IntToken other) {
-        return (other instanceof IntToken &&
-                value == ((IntToken)other).value);
-    }
-
-    public int hashCode() {
-        return value;
+    public int hashCode() { // if two objects are not equal to eachother they will not return the same
+                            // hashcode
+        return 17;
     }
 
     public String toString() {
-        return "IntToken(" + value + ")";
+        return "IntToken";
     }
 }

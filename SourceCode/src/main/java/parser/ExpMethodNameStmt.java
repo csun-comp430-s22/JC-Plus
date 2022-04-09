@@ -2,14 +2,14 @@ package parser;
 
 import java.util.List;
 
-public class ExpMethodNameStmt implements Stmt {
+public class ExpMethodNameStmt implements Exp {
 
     public final Exp exp;
-    public final MethodName methodName;
+    public final Exp methodName;
     public final List<Exp> params;
 
     public ExpMethodNameStmt(final Exp exp,
-            final MethodName methodName,
+            final Exp methodName,
             final List<Exp> params) {
         this.exp = exp;
         this.methodName = methodName;

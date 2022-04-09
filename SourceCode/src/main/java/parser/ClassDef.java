@@ -3,15 +3,15 @@ package parser;
 import java.util.List;
 
 public class ClassDef {
-    public final ClassName className;
-    public final ClassName extendsClassName;
+    public final Exp className;
+    public final Exp extendsClassName;
     public final List<VarDec> instanceVariables;
     public final List<VarDec> constructorArguments;
     public final List<Stmt> superBody;
     public final List<MethodDef> methods;
 
-    public ClassDef(final ClassName className,
-            final ClassName extendsClassName,
+    public ClassDef(final Exp className,
+            final Exp extendsClassName,
             final List<VarDec> instanceVariables,
             final List<VarDec> constructorArguments,
             final List<Stmt> superBody,

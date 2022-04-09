@@ -1,10 +1,10 @@
 package parser;
 
-public class VarDec{
-    public final Type type;
+public class VarDec implements Token{
+    public final TypeToken type;
     public final Variable variable;
 
-    public VarDec(final Type type,
+    public VarDec(final TypeToken type,
                   final Variable variable) {
         this.type = type;
         this.variable = variable;
