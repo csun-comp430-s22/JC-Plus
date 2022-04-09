@@ -1,6 +1,6 @@
 package parser;
 
-public class ClassName {
+public class ClassName implements Token{
     public final String name;
 
     public ClassName(final String name) {

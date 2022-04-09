@@ -1,10 +1,10 @@
 package parser;
 
-public class TypeExp implements Exp {
-    public final String name;
+public class TypeExp implements Type {
+    public final TypeToken name;
 
-    public TypeExp(final String name) {
-        this.name = name;
+    public TypeExp(final TypeToken typeToken) {
+        this.name = typeToken;
     }
 
     public boolean equals(final Object other) {

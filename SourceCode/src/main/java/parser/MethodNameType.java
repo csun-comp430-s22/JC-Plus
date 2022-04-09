@@ -1,10 +1,10 @@
-package parser; 
+package parser;
 
-public class MethodName  implements Token{
-    public final String name;
+public class MethodNameType  implements Exp{
+    public final MethodName name;
 
-    public MethodName(final String name) {
-        this.name = name;
+    public MethodNameType(final MethodName methodName) {
+        this.name = methodName;
     }
 
     public int hashCode() {
@@ -17,6 +17,6 @@ public class MethodName  implements Token{
     }
     
     public String toString() {
-        return "MethodName(" + name + ")";
+        return "MethodName(" + name.toString() + ")";
     }
 }

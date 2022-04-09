@@ -186,7 +186,7 @@ public class TokenizerTest {
     public void testPrintByItself() throws TokenizerException {
 
         // Check that tokenizing "this" works
-        assertTokenizes("println", new Token[] { new PrintToken() });
+        assertTokenizes("println", new Token[] { new PrintlnToken() });
     }
 
     @Test

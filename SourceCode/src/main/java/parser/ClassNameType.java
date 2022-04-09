@@ -1,10 +1,10 @@
 package parser;
 
-public class ClassNameType implements Type {
+public class ClassNameType implements Exp {
     public final ClassName className;
 
-    public ClassNameType(final ClassName className) {
-        this.className = className;
+    public ClassNameType(final ClassName className2) {
+        this.className = className2;
     }
 
     public int hashCode() {

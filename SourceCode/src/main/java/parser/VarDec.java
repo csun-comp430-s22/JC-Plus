@@ -1,6 +1,6 @@
 package parser;
 
-public class VarDec {
+public class VarDec{
     public final Type type;
     public final Variable variable;
 
