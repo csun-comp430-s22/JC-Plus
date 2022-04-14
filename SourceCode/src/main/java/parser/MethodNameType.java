@@ -1,6 +1,6 @@
 package parser;
 
-public class MethodNameType  implements Exp{
+public class MethodNameType  implements Exp{ //Int methodname
     public final MethodName name;
 
     public MethodNameType(final MethodName methodName) {

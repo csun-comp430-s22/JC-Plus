@@ -1,7 +1,7 @@
 package parser;
 
 
-public class VarDecStmt implements Stmt {
+public class VarDecStmt implements Stmt { //type var
     public final VarDec vardec;
     public final Exp exp;
 

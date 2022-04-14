@@ -2,14 +2,14 @@ package parser;
 
 import java.util.List;
 
-public class ExpMethodNameStmt implements Exp {
+public class ExpMethodNameExp implements Exp {
 
     public final Exp exp;
-    public final Exp methodName;
+    public final MethodName methodName;
     public final List<Exp> params;
 
-    public ExpMethodNameStmt(final Exp exp,
-            final Exp methodName,
+    public ExpMethodNameExp(final Exp exp,
+            final MethodName methodName,
             final List<Exp> params) {
         this.exp = exp;
         this.methodName = methodName;
@@ -23,8 +23,8 @@ public class ExpMethodNameStmt implements Exp {
     }
 
     public boolean equals(final Object other) {
-        if (other instanceof ExpMethodNameStmt) {
-            final ExpMethodNameStmt call = (ExpMethodNameStmt) other;
+        if (other instanceof ExpMethodNameExp) {
+            final ExpMethodNameExp call = (ExpMethodNameExp) other;
             return (exp.equals(call.exp) &&
                     methodName.equals(call.methodName) &&
                     params.equals(call.params));
@@ -34,7 +34,7 @@ public class ExpMethodNameStmt implements Exp {
     }
 
     public String toString() {
-        return ("ExpMethodNameStmt(" + exp.toString() + ", " +
+        return ("ExpMethodNameExp(" + exp.toString() + ", " +
                 methodName.toString() + ", " +
                 params.toString() + ")");
     }
