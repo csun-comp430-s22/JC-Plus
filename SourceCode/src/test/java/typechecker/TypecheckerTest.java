@@ -7,12 +7,13 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class TypecheckerTest {
     public static final Typechecker emptyTypechecker =
         new Typechecker(new Program(new ArrayList<ClassDef>(),
-                                    new ExpStmt(new IntLiteralExp(0))));
+                                    new ExpStmt(new IntLiteralExp(0))));  //Osher: not sure what expstmt is 
 
     @Test
     public void testVariableInScope() throws TypeErrorException {
@@ -35,8 +36,8 @@ public class TypecheckerTest {
 
     @Test
     public void testThisInClass() throws TypeErrorException {
-        assertEquals(new ClassNameType(new ClassName("foo")),
-                     emptyTypechecker.typeofThis(new ClassName("foo")));
+        assertEquals(new ClassNameType(new ClassNameExp( new ClassNameToken("foo"))),
+                     emptyTypechecker.typeofThis(new ClassNameExp(new ClassNameToken("foo"))));  //Osher: added token parameter to classnameexp
     }
 
     @Test(expected = TypeErrorException.class)
@@ -44,6 +45,3 @@ public class TypecheckerTest {
         emptyTypechecker.typeofThis(null);
     }
 }
-© 2022 GitHub, Inc.
-Terms
-Privacy
