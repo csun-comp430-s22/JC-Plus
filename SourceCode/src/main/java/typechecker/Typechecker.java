@@ -1,9 +1,39 @@
 package typechecker;
 
-
-
 import java.util.List;
 import java.util.Map;
+
+import parser.BlockStmt;
+import parser.ClassDef;
+import parser.ClassNameExp;
+import parser.ClassNameType;
+import parser.EqualsOp;
+import parser.Exp;
+import parser.IfExp;
+import parser.IntLiteralExp;
+import parser.IntType;
+import parser.LessThanOp;
+import parser.MethodCallExp;
+import parser.MethodDef;
+import parser.MethodName;
+import parser.NewExp;
+import parser.OpExp;
+import parser.PlusOp;
+import parser.PrintlnStmt;
+import parser.Program;
+import parser.ReturnNonVoidStmt;
+import parser.ReturnVoidStmt;
+import parser.Stmt;
+import parser.ThisExp;
+import parser.Type;
+import parser.VarDec;
+import parser.Variable;
+import parser.VariableExp;
+import parser.VariableInitializationStmt;
+import parser.VoidType;
+import parser.WhileStmt;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 
 // typechecks: well-typed: no type errors
@@ -31,7 +61,7 @@ public class Typechecker {
     // recommended: ClassName -> ParentClass
     public Typechecker(final Program program) {
         this.program = program;
-        this.classes = program.classes;
+        this.classes = program.classes; // Osher: added this to parser program.java file to avoid error
         // TODO: check that class hierarchy is a tree
     }
 
@@ -45,19 +75,19 @@ public class Typechecker {
         }
     }
 
-    public Type typeofThis(final ClassName classWeAreIn) throws TypeErrorException {
+    public Type typeofThis(final ClassNameExp classWeAreIn) throws TypeErrorException { //Osher: in Deweys file, he had classname so i changed it to classnameExp to match what dewey did
         if (classWeAreIn == null) {
             throw new TypeErrorException("this used in the entry point");
         } else {
-            return new ClassNameType(classWeAreIn);
+            return new ClassNameType(classWeAreIn);   // Osher: we did not have a class name type in our parser and dewey did so i added it in
         }
     }
 
     public Type typeofOp(final OpExp exp,
                          final Map<Variable, Type> typeEnvironment,
-                         final ClassName classWeAreIn) throws TypeErrorException {
+                         final ClassNameExp classWeAreIn) throws TypeErrorException {
         final Type leftType = typeof(exp.left, typeEnvironment, classWeAreIn);
-        final Type rightType = typeof(exp.right, typeEnvironment, classWeAreIn);
+        final Type rightType = typeof(exp.right, typeEnvironment, classWeAreIn);   //Osher: not exactly certain where this function is coming from
         // (leftType, exp.op, rightType) match {
         //   case (IntType, PlusOp, IntType) => IntType
         //   case (IntType, LessThanOp | EqualsOp, IntType) => Booltype
@@ -71,13 +101,13 @@ public class Typechecker {
             }
         } else if (exp.op instanceof LessThanOp) {
             if (leftType instanceof IntType && rightType instanceof IntType) {
-                return new BoolType();
+                return new IntType();    //Osher: this originally said booltype, we dont have booltype in our language so i changed it to inttype. This is similar to what happens in C
             } else {
                 throw new TypeErrorException("Operand type mismatch for <");
             }
         } else if (exp.op instanceof EqualsOp) {
             if (leftType instanceof IntType && rightType instanceof IntType) {
-                return new BoolType();
+                return new IntType();    //Osher: same idea as above, changed to inttype
             } else {
                 throw new TypeErrorException("Operand type mismatch for ==");
             }
@@ -86,7 +116,7 @@ public class Typechecker {
         }
     }
 
-    public Type expectedReturnTypeForClassAndMethod(final ClassName className,
+    public Type expectedReturnTypeForClassAndMethod(final ClassNameExp className,  //Osher: changed to classnameexp
                                                     final MethodName methodName) {
         // WRONG - needs to find the given class and method, and return the expected
         // return type for this
@@ -121,7 +151,7 @@ public class Typechecker {
     // for every class:
     //   - Methods on that class
     //   - Methods on the parent of that class
-    public List<Type> expectedParameterTypesForClassAndMethod(final ClassName className,
+    public List<Type> expectedParameterTypesForClassAndMethod(final ClassNameExp className,
                                                               final MethodName methodName)
         throws TypeErrorException {
         for (final ClassDef candidateClass : classes) {
@@ -129,8 +159,8 @@ public class Typechecker {
                 for (final MethodDef candidateMethod : candidateClass.methods) {
                     if (candidateMethod.methodName.equals(methodName)) {
                         final List<Type> expectedTypes = new ArrayList<Type>();
-                        for (final Vardec vardec : candidteMethod.arguments) {
-                            expectedTypes.add(vardec.type);
+                        for (final VarDec vardec : candidteMethod.arguments) {
+                            expectedTypes.add(vardec.type);  //OsherL didnt want to break vardec so left as is
                         }
                         return expectedTypes;
                     }
@@ -148,7 +178,7 @@ public class Typechecker {
     
     public void isEqualOrSubtypeOf(final Type first, final Type second) throws TypeErrorException {
         if (!(first.equals(second) || isSubtypeOf(first, second))) {
-            throw new TypeErorException("types incompatible: " + first + ", " + second);
+            throw new TypeErrorException("types incompatible: " + first + ", " + second);
         }
     }
 
@@ -157,12 +187,12 @@ public class Typechecker {
     public void expressionsOk(final List<Type> expectedTypes,
                               final List<Exp> receivedExpressions,
                               final Map<Variable, Type> typeEnvironment,
-                              final ClassName classWeAreIn) throws TypeErrorException {
+                              final ClassNameExp classWeAreIn) throws TypeErrorException {
         if (expectedTypes.size() != receivedExpressions.size()) {
             throw new TypeErrorException("Wrong number of parameters");
         }
         for (int index = 0; index < expectedTypes.size(); index++) {
-            final Type paramType = typeof(receivedExpressions.get(index), typeEnvironment, classWeAreIn);
+            final Type paramType = typeof(receivedExpressions.get(index), typeEnvironment, classWeAreIn);  // Osher: not sure where this function is coming from
             final Type expectedType = expectedTypes.get(index);
             // myMethod(int, bool, int)
             // myMethod(  2, true,   3)
@@ -181,10 +211,10 @@ public class Typechecker {
     // target.methodName(params)
     public Type typeofMethodCall(final MethodCallExp exp,
                                  final Map<Variable, Type> typeEnvironment,
-                                 final ClassName classWeAreIn) throws TypeErrorException {
-        final Type targetType = typeof(exp.target, typeEnvironment, classWeAreIn);
+                                 final ClassNameExp classWeAreIn) throws TypeErrorException {
+        final Type targetType = typeof(exp.target, typeEnvironment, classWeAreIn);  //Osher: not sure where typeof is coming from
         if (targetType instanceof ClassNameType) {
-            final ClassName className = ((ClassNameType)targetType).className;
+            final ClassNameExp className = ((ClassNameType)targetType).className;
             final List<Type> expectedTypes =
                 expectedParameterTypesForClassAndMethod(className, exp.methodName);
             expressionsOk(expectedTypes, exp.params, typeEnvironment, classWeAreIn);
@@ -194,7 +224,7 @@ public class Typechecker {
         }
     }
 
-    public List<Type> expectedConstructorTypesForClass(final ClassName className)
+    public List<Type> expectedConstructorTypesForClass(final ClassNameExp className)
         throws TypeErrorException {
         // WRONG - needs to grab the expected constructor types for this class
         // throws an exception if this class doesn't exception
@@ -205,9 +235,9 @@ public class Typechecker {
     // new className(params)
     public Type typeofNew(final NewExp exp,
                           final Map<Variable, Type> typeEnvironment,
-                          final ClassName classWeAreIn) throws TypeErrorException {
+                          final ClassNameExp classWeAreIn) throws TypeErrorException {
         // need to know what the constructor arguments for this class are
-        final List<Type> expectedTypes = expectedConstructorTypesForClass(exp.className);
+        final List<Type> expectedTypes = expectedConstructorTypesForClass(exp.className);   //Osher: didnt make edits here in order not to break code
         expressionsOk(expectedTypes, exp.params, typeEnvironment, classWeAreIn);
         return new ClassNameType(exp.className);
     }
@@ -215,14 +245,14 @@ public class Typechecker {
     // classWeAreIn is null if we are in the entry point
     public Type typeof(final Exp exp,
                        final Map<Variable, Type> typeEnvironment,
-                       final ClassName classWeAreIn) throws TypeErrorException {
+                       final ClassNameExp classWeAreIn) throws TypeErrorException {
         if (exp instanceof IntLiteralExp) {
             return new IntType();
         } else if (exp instanceof VariableExp) {
             return typeofVariable((VariableExp)exp, typeEnvironment);
-        } else if (exp instanceof BoolLiteralExp) {
-            return new BoolType();
-        } else if (exp instanceof ThisExp) {
+        }// else if (exp instanceof BoolLiteralExp) {  Osher; bool doesnt exist so commented it out
+            //return new BoolType();}  
+        else if (exp instanceof ThisExp) {
             return typeofThis(classWeAreIn);
         } else if (exp instanceof OpExp) {
             return typeofOp((OpExp)exp, typeEnvironment, classWeAreIn);
@@ -246,18 +276,18 @@ public class Typechecker {
 
     public Map<Variable, Type> isWellTypedVar(final VariableInitializationStmt stmt,
                                               final Map<Variable, Type> typeEnvironment,
-                                              final ClassName classWeAreIn) throws TypeErrorException {
+                                              final ClassNameExp classWeAreIn) throws TypeErrorException {
         final Type expType = typeof(stmt.exp, typeEnvironment, classWeAreIn);
         isEqualOrSubtypeOf(expType, stmt.vardec.type);
-        return addToMap(typeEnvironment, stt.vardec.variable, stmt.vardec.type);
+        return addToMap(typeEnvironment, stmt.vardec.variable, stmt.vardec.type);   //Osher: not sure about these functions and do not want to break code
     }
 
-    public Map<Variable, Type> isWellTypedIf(final IfStmt stmt,
+    public Map<Variable, Type> isWellTypedIf(final IfExp stmt,   //Osher: this if implements statement even tho its called ifexp
                                              final Map<Variable, Type> typeEnvironment,
-                                             final ClassName classWeAreIn,
+                                             final ClassNameExp classWeAreIn,
                                              final Type functionReturnType) throws TypeErrorException {
         if (typeof(stmt.guard, typeEnvironment, classWeAreIn) instanceof BoolType) {
-            isWellTypedStmt(stmt.ifTrue, typeEnvironment, classWeAreIn, functionReturnType);
+            isWellTypedStmt(stmt.ifTrue, typeEnvironment, classWeAreIn, functionReturnType);   //Osher: not sure how to rework this for our language
             isWellTypedStmt(stmt.ifFalse, typeEnvironment, classWeAreIn, functionReturnType);
             return typeEnvironment;
         } else {
@@ -267,10 +297,10 @@ public class Typechecker {
 
     public Map<Variable, Type> isWellTypedWhile(final WhileStmt stmt,
                                                 final Map<Variable, Type> typeEnvironment,
-                                                final ClassName classWeAreIn,
+                                                final ClassNameExp classWeAreIn,
                                                 final Type functionReturnType) throws TypeErrorException {
         if (typeof(stmt.guard, typeEnvironment, classWeAreIn) instanceof BoolType) {
-            isWellTypedStmt(stmt.body, typeEnvironment, classWeAreIn, functionReturnType);
+            isWellTypedStmt(stmt.body, typeEnvironment, classWeAreIn, functionReturnType); //Osher: not sure how to rework this for our language
             return typeEnvironment;
         } else {
             throw new TypeErrorException("guard on while is not a boolean: " + stmt);
@@ -279,7 +309,7 @@ public class Typechecker {
 
     public Map<Variable, Type> isWellTypedBlock(final BlockStmt stmt,
                                                 Map<Variable, Type> typeEnvironment,
-                                                final ClassName classWeAreIn,
+                                                final ClassNameExp classWeAreIn,
                                                 final Type functionReturnType) throws TypeErrorException {
         for (final Stmt bodyStmt : stmt.body) {
             typeEnvironment = isWellTypedStmt(bodyStmt, typeEnvironment, classWeAreIn, functionReturnType);
@@ -302,7 +332,7 @@ public class Typechecker {
     }
 
     public Map<Variable, Type> isWellTypedReturnVoid(final Map<Variable, Type> typeEnvironment,
-                                                     final ClassName classWeAreIn,
+                                                     final ClassNameExp classWeAreIn,
                                                      final Type functionReturnType) throws TypeErrorException {
         if (functionReturnType == null) {
             throw new TypeErrorException("return in program entry point");
@@ -320,15 +350,15 @@ public class Typechecker {
     // }
     public Map<Variable, Type> isWellTypedStmt(final Stmt stmt,
                                                final Map<Variable, Type> typeEnvironment,
-                                               final ClassName classWeAreIn,
+                                               final ClassNameExp classWeAreIn,
                                                final Type functionReturnType) throws TypeErrorException {
-        if (stmt instanceof ExpStmt) {
+        if (stmt instanceof ExpStmt) {   //Osher: no idea what dewey is doing here
             typeof(((ExpStmt)stmt).exp, typeEnvironment, classWeAreIn, functionReturnType);
             return typeEnvironment;
         } else if (stmt instanceof VariableInitializationStmt) {
             return isWellTypedVar((VariableInitializationStmt)stmt, typeEnvironment, classWeAreIn, functionReturnType);
-        } else if (stmt instanceof IfStmt) {
-            return isWellTypedIf((IfStmt)stmt, typeEnvironment, classWeAreIn, functionReturnType);
+        } else if (stmt instanceof IfExp) {
+            return isWellTypedIf((IfExp)stmt, typeEnvironment, classWeAreIn, functionReturnType);
         } else if (stmt instanceof WhileStmt) {
             return isWellTypedWhile((WhileStmt)stmt, typeEnvironment, classWeAreIn, functionReturnType);
         } else if (stmt instanceof ReturnNonVoidStmt) {
@@ -348,13 +378,13 @@ public class Typechecker {
     // methoddef ::= type methodname(vardec*) stmt
     public void isWellTypedMethodDef(final MethodDef method,
                                      Map<Variable, Type> typeEnvironment, // instance variables
-                                     final ClassName classWeAreIn) throws TypeErrorException {
+                                     final ClassNameExp classWeAreIn) throws TypeErrorException {
         // starting type environment: just instance variables
         // int addTwo(int x, int y) { return x + y; }
         //
         // int x;
         // int addTwo(bool x, int x) { return x; }
-        for (final Vardec vardec : method.arguments) {
+        for (final VarDec vardec : method.arguments) {
             // odd semantics: last variable declaration shadows prior one
             typeEnvironment = addToMap(typeEnvironment, vardec.variable, vardec.type);
         }
@@ -385,13 +415,13 @@ public class Typechecker {
         //   ...
         // }
         Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
-        for (final Vardec vardec : classDef.instanceVariables) {
+        for (final VarDec vardec : classDef.instanceVariables) {
             typeEnvironment = addToMap(typeEnvironment, vardec.variable, vardec.type);
         }
         
         // check constructor
         Map<Variable, Type> constructorTypeEnvironment = typeEnvironment;
-        for (final Vardec vardec : classDef.constructorArguments) {
+        for (final VarDec vardec : classDef.constructorArguments) {
             constructorTypeEnvironment = addToMap(constructorTypeEnvironment, vardec.variable, vardec.type);
         }
         // check call to super
@@ -423,7 +453,7 @@ public class Typechecker {
         }
 
         isWellTypedStmt(program.entryPoint,
-                        new HashMap<Varible, Type>(),
+                        new HashMap<Variable, Type>(),
                         null,
                         null);
     }
