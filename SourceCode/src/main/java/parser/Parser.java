@@ -136,7 +136,13 @@ public class Parser {
             assertTokenHereIs(exp.position, new parser.RightBracketToken());
             return new ParseResult<Exp>(new NewArrayDeclarationExp(type.result, exp.result),
                     exp.position + 2);
-        } else if (token instanceof Variable) { //exp.methodname(exp*)
+        }  else if (token instanceof ExtendsToken) { // new type[exp]
+         
+            assertTokenHereIs(position, new ExtendsToken());
+           
+            return new ParseResult<Exp>(new ExtendsExp(),position+1);
+        } 
+        else if (token instanceof Variable) { //exp.methodname(exp*)
             final ParseResult<Exp> exp = parseExp(position);
             assertTokenHereIs(exp.position, new DotToken());
             final ParseResult<MethodNameType> methodName = parseMethodName(exp.position + 1);
@@ -178,11 +184,11 @@ public class Parser {
     }
     // parsemethodName
 
-    public ParseResult<Exp> parseClass(final int position) throws ParseException {
+    public ParseResult<ClassNameExp> parseClass(final int position) throws ParseException {
         final Token token = getToken(position);
         if (token instanceof ClassNameToken) {
             final String name = ((ClassNameToken) token).name;
-            return new ParseResult<Exp>(new ClassNameExp(new ClassNameToken(name)), position + 1);
+            return new ParseResult<ClassNameExp>(new ClassNameExp(new ClassNameToken(name)), position + 1);
         } else {
             throw new ParseException("expected className; received: " + token);
         }
@@ -313,8 +319,8 @@ public class Parser {
             // TODO something should be here??
             final ParseResult<Type> type = parseType(position); //Int
             final ParseResult<Exp> variableExp = parseVariableExp(type.position); //Int x
-            TypeToken t = new TypeToken(type.result.toString());
-            VarDec a = new VarDec(t, new Variable(variableExp.result.toString()));
+      
+            VarDec a = new VarDec(type.result, new Variable(variableExp.result.toString()));
             return new ParseResult<VarDec>(a, variableExp.position);
 
             /*
@@ -345,8 +351,7 @@ public class Parser {
             // TODO something should be here??
             final ParseResult<Type> type = parseType(position); //Int
             final ParseResult<Exp> variableExp = parseVariableExp(type.position); //Int x
-            TypeToken t = new TypeToken(type.result.toString());
-            VarDec a = new VarDec(t, new Variable(variableExp.result.toString()));
+            VarDec a = new VarDec(type.result, new Variable(variableExp.result.toString()));
             assertTokenHereIs(variableExp.position, new AssignmentToken()); // Int x =
             final ParseResult<Exp> assignmentExp = parseExp(variableExp.position + 1); //Int x = 0
             return new ParseResult<Stmt>(new VarDecStmt(a, assignmentExp.result), variableExp.position);
@@ -476,8 +481,8 @@ public class Parser {
             while (shouldRun) {
                 try {
                     final ParseResult<VarDec> vardec = parseVardec(curPosition);
-                    TypeToken t = new TypeToken(type.result.toString());
-                    stmts.add(new VarDec(t, new Variable(vardec.result.toString())));
+                  
+                    stmts.add(new VarDec(type.result, new Variable(vardec.result.toString())));
                     curPosition = vardec.position;
                 } catch (final ParseException e) {
                     shouldRun = false;
@@ -507,8 +512,8 @@ public class Parser {
             // TODO something should be here??
             final ParseResult<Type> type = parseType(position); //Int
             final ParseResult<Exp> variableExp = parseVariableExp(type.position); //Int x
-            TypeToken t = new TypeToken(type.result.toString());
-            VarDec a = new VarDec(t, new Variable(variableExp.result.toString()));
+          
+            VarDec a = new VarDec(type.result, new Variable(variableExp.result.toString()));
             return new ParseResult<VarDec>(a, variableExp.position);
 
             /*
@@ -537,9 +542,9 @@ public class Parser {
             // constructor(vardec*) stmt* // vardecs are comma-sep
             // methoddef* }
 
-            final ParseResult<Exp> className = parseClass(position + 1); // skip whitespace after class
+            final ParseResult<ClassNameExp> className = parseClass(position + 1); // skip whitespace after class
             assertTokenHereIs(className.position, new ExtendsToken());
-            final ParseResult<Exp> extendsClassName = parseClass(className.position + 1);
+            final ParseResult<Exp> extendsClassName = parseSecondaryExp(className.position + 1);
 
             assertTokenHereIs(extendsClassName.position, new parser.LeftCurlyToken());
 
@@ -562,7 +567,7 @@ public class Parser {
 
             String a = getToken(curPosition + 1).toString();
             assertTokenHereIs(curPosition + 1, new ClassNameToken(a));
-            final ParseResult<Exp> constructorName = parseClass(curPosition + 1);
+            final ParseResult<ClassNameExp> constructorName = parseClass(curPosition + 1);
             assertTokenHereIs(constructorName.position, new LeftParenToken());
 
             // vardec*

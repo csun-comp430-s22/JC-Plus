@@ -3,10 +3,10 @@ package parser;
 import java.util.List;
 
 public class NewExp implements Exp {
-    public final ClassNameToken className;
+    public final ClassNameExp className;
     public final List<Exp> params;
 
-    public NewExp(final ClassNameToken className,
+    public NewExp(final ClassNameExp className,
                   final List<Exp> params) {
         this.className = className;
         this.params = params;

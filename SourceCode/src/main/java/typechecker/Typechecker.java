@@ -3,35 +3,8 @@ package typechecker;
 import java.util.List;
 import java.util.Map;
 
-import parser.BlockStmt;
-import parser.ClassDef;
-import parser.ClassNameExp;
-import parser.ClassNameType;
-import parser.EqualsOp;
-import parser.Exp;
-import parser.IfExp;
-import parser.IntLiteralExp;
-import parser.IntType;
-import parser.LessThanOp;
-import parser.MethodCallExp;
-import parser.MethodDef;
-import parser.MethodName;
-import parser.NewExp;
-import parser.OpExp;
-import parser.PlusOp;
-import parser.PrintlnStmt;
-import parser.Program;
-import parser.ReturnNonVoidStmt;
-import parser.ReturnVoidStmt;
-import parser.Stmt;
-import parser.ThisExp;
-import parser.Type;
-import parser.VarDec;
-import parser.Variable;
-import parser.VariableExp;
-import parser.VariableInitializationStmt;
-import parser.VoidType;
-import parser.WhileStmt;
+
+import parser.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -99,13 +72,47 @@ public class Typechecker {
             } else {
                 throw new TypeErrorException("Operand type mismatch for +");
             }
-        } else if (exp.op instanceof LessThanOp) {
+        } else if (exp.op instanceof MinusOp) {
+            if (leftType instanceof IntType && rightType instanceof IntType) {
+                return new IntType();    //Osher: same idea as above, changed to inttype
+            } else {
+                throw new TypeErrorException("Operand type mismatch for -");
+            }
+        }else if (exp.op instanceof MultiplicationOp) {
+            if (leftType instanceof IntType && rightType instanceof IntType) {
+                return new IntType();    //Osher: same idea as above, changed to inttype
+            } else {
+                throw new TypeErrorException("Operand type mismatch for *");
+            }
+        }
+        else if (exp.op instanceof DivisionOp) {
+            if (leftType instanceof IntType && rightType instanceof IntType) {
+                return new IntType();    //Osher: same idea as above, changed to inttype
+            } else {
+                throw new TypeErrorException("Operand type mismatch for /");
+            }
+        }
+        else if (exp.op instanceof GreaterThanOp){
             if (leftType instanceof IntType && rightType instanceof IntType) {
                 return new IntType();    //Osher: this originally said booltype, we dont have booltype in our language so i changed it to inttype. This is similar to what happens in C
             } else {
-                throw new TypeErrorException("Operand type mismatch for <");
+                throw new TypeErrorException("Operand type mismatch for >");
             }
-        } else if (exp.op instanceof EqualsOp) {
+        }
+            else if (exp.op instanceof LessThanOp) {
+                if (leftType instanceof IntType && rightType instanceof IntType) {
+                    return new IntType();    //Osher: this originally said booltype, we dont have booltype in our language so i changed it to inttype. This is similar to what happens in C
+                } else {
+                    throw new TypeErrorException("Operand type mismatch for <");
+                }
+        } else if (exp.op instanceof NotEqualOp) {
+            if (leftType instanceof IntType && rightType instanceof IntType) {
+                return new IntType();    //Osher: same idea as above, changed to inttype
+            } else {
+                throw new TypeErrorException("Operand type mismatch for !=");
+            }
+        }
+            else if (exp.op instanceof EqualsOp) {
             if (leftType instanceof IntType && rightType instanceof IntType) {
                 return new IntType();    //Osher: same idea as above, changed to inttype
             } else {
@@ -159,7 +166,7 @@ public class Typechecker {
                 for (final MethodDef candidateMethod : candidateClass.methods) {
                     if (candidateMethod.methodName.equals(methodName)) {
                         final List<Type> expectedTypes = new ArrayList<Type>();
-                        for (final VarDec vardec : candidteMethod.arguments) {
+                        for (final VarDec vardec : candidateMethod.arguments) {
                             expectedTypes.add(vardec.type);  //OsherL didnt want to break vardec so left as is
                         }
                         return expectedTypes;
@@ -224,7 +231,7 @@ public class Typechecker {
         }
     }
 
-    public List<Type> expectedConstructorTypesForClass(final ClassNameExp className)
+    public List<Type> expectedConstructorTypesForClass(final Exp className)
         throws TypeErrorException {
         // WRONG - needs to grab the expected constructor types for this class
         // throws an exception if this class doesn't exception
@@ -253,14 +260,15 @@ public class Typechecker {
         }// else if (exp instanceof BoolLiteralExp) {  Osher; bool doesnt exist so commented it out
             //return new BoolType();}  
         else if (exp instanceof ThisExp) {
-            return typeofThis(classWeAreIn);
+            return typeofThis(classWeAreIn);//done
         } else if (exp instanceof OpExp) {
-            return typeofOp((OpExp)exp, typeEnvironment, classWeAreIn);
+            return typeofOp((OpExp)exp, typeEnvironment, classWeAreIn);//done
         } else if (exp instanceof MethodCallExp) {
             return typeofMethodCall((MethodCallExp)exp, typeEnvironment, classWeAreIn);
         } else if (exp instanceof NewExp) {
-            return typeofNew((NewExp)exp, typeEnvironment, classWeAreIn);
-        } else {
+            return typeofNew((NewExp)exp, typeEnvironment, classWeAreIn); //done
+        } else { 
+            //add lenExp 
             throw new TypeErrorException("Unrecognized expression: " + exp);
         }
     }
@@ -286,9 +294,9 @@ public class Typechecker {
                                              final Map<Variable, Type> typeEnvironment,
                                              final ClassNameExp classWeAreIn,
                                              final Type functionReturnType) throws TypeErrorException {
-        if (typeof(stmt.guard, typeEnvironment, classWeAreIn) instanceof BoolType) {
-            isWellTypedStmt(stmt.ifTrue, typeEnvironment, classWeAreIn, functionReturnType);   //Osher: not sure how to rework this for our language
-            isWellTypedStmt(stmt.ifFalse, typeEnvironment, classWeAreIn, functionReturnType);
+        if (typeof(stmt.guard, typeEnvironment, classWeAreIn) instanceof IntType) {
+            isWellTypedStmt(stmt.trueBranch, typeEnvironment, classWeAreIn, functionReturnType);   //Osher: not sure how to rework this for our language
+            isWellTypedStmt(stmt.falseBranch, typeEnvironment, classWeAreIn, functionReturnType);
             return typeEnvironment;
         } else {
             throw new TypeErrorException("guard of if is not a boolean: " + stmt);
@@ -299,7 +307,7 @@ public class Typechecker {
                                                 final Map<Variable, Type> typeEnvironment,
                                                 final ClassNameExp classWeAreIn,
                                                 final Type functionReturnType) throws TypeErrorException {
-        if (typeof(stmt.guard, typeEnvironment, classWeAreIn) instanceof BoolType) {
+        if (typeof(stmt.guard, typeEnvironment, classWeAreIn) instanceof IntType) {
             isWellTypedStmt(stmt.body, typeEnvironment, classWeAreIn, functionReturnType); //Osher: not sure how to rework this for our language
             return typeEnvironment;
         } else {
@@ -311,7 +319,7 @@ public class Typechecker {
                                                 Map<Variable, Type> typeEnvironment,
                                                 final ClassNameExp classWeAreIn,
                                                 final Type functionReturnType) throws TypeErrorException {
-        for (final Stmt bodyStmt : stmt.body) {
+        for (final Stmt bodyStmt : stmt.stmts) {
             typeEnvironment = isWellTypedStmt(bodyStmt, typeEnvironment, classWeAreIn, functionReturnType);
         }
         return typeEnvironment;
@@ -320,7 +328,7 @@ public class Typechecker {
     // return exp;
     public Map<Variable, Type> isWellTypedReturnNonVoid(final ReturnNonVoidStmt stmt,
                                                         final Map<Variable, Type> typeEnvironment,
-                                                        final ClassName classWeAreIn,
+                                                        final ClassNameExp classWeAreIn,
                                                         final Type functionReturnType) throws TypeErrorException {
         if (functionReturnType == null) {
             throw new TypeErrorException("return in program entry point");
@@ -353,10 +361,10 @@ public class Typechecker {
                                                final ClassNameExp classWeAreIn,
                                                final Type functionReturnType) throws TypeErrorException {
         if (stmt instanceof ExpStmt) {   //Osher: no idea what dewey is doing here
-            typeof(((ExpStmt)stmt).exp, typeEnvironment, classWeAreIn, functionReturnType);
+            typeof(((ExpStmt)stmt).exp, typeEnvironment, classWeAreIn);
             return typeEnvironment;
         } else if (stmt instanceof VariableInitializationStmt) {
-            return isWellTypedVar((VariableInitializationStmt)stmt, typeEnvironment, classWeAreIn, functionReturnType);
+            return isWellTypedVar((VariableInitializationStmt)stmt, typeEnvironment, classWeAreIn);
         } else if (stmt instanceof IfExp) {
             return isWellTypedIf((IfExp)stmt, typeEnvironment, classWeAreIn, functionReturnType);
         } else if (stmt instanceof WhileStmt) {
@@ -366,7 +374,7 @@ public class Typechecker {
         } else if (stmt instanceof ReturnVoidStmt) {
             return isWellTypedReturnVoid(typeEnvironment, classWeAreIn, functionReturnType);
         } else if (stmt instanceof PrintlnStmt) {
-            typeof(((PrintlnStmt)stmt).exp, typeEnvironment, classWeAreIn, functionReturnType);
+            typeof(((PrintlnStmt)stmt).exp, typeEnvironment, classWeAreIn);
             return typeEnvironment;
         } else if (stmt instanceof BlockStmt) {
             return isWellTypedBlock((BlockStmt)stmt, typeEnvironment, classWeAreIn, functionReturnType);
@@ -425,11 +433,8 @@ public class Typechecker {
             constructorTypeEnvironment = addToMap(constructorTypeEnvironment, vardec.variable, vardec.type);
         }
         // check call to super
-        expressionsOk(expectedConstructorTypesForClass(classDef.extendsClassName),
-                      classDef.superParams,
-                      constructorTypeEnvironment,
-                      classDef.className);
-        isWellTypedBlock(new BlockStmt(classDef.constructorBody),
+    
+        isWellTypedBlock(new BlockStmt(classDef.superBody),
                          constructorTypeEnvironment,
                          classDef.className,
                          new VoidType());

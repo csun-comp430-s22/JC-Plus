@@ -13,7 +13,7 @@ import java.util.HashMap;
 public class TypecheckerTest {
     public static final Typechecker emptyTypechecker =
         new Typechecker(new Program(new ArrayList<ClassDef>(),
-                                    new ExpStmt(new IntLiteralExp(0))));  //Osher: not sure what expstmt is 
+                                 new ExpStmt(new IntLiteralExp(0))));  //Osher: not sure what expstmt is 
 
     @Test
     public void testVariableInScope() throws TypeErrorException {

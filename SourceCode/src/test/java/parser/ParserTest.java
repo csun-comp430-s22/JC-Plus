@@ -53,7 +53,7 @@ public class ParserTest {
                                 new IntLiteralToken(0)));
                 assertEquals(
                                 new ParseResult<Stmt>(
-                                                new VarDecStmt(new VarDec(new TypeToken("Int"), new Variable("x")),
+                                                new VarDecStmt(new VarDec(new IntType(), new Variable("x")),
                                                                 new IntLiteralExp(0)),
                                                 0),
                                 parser.parseVardecStmt(0));
@@ -66,7 +66,7 @@ public class ParserTest {
                                 new AssignmentToken(), new IntLiteralToken(0)));
                 assertEquals(
                                 new ParseResult<Stmt>(
-                                                new VarDecStmt(new VarDec(new TypeToken("Void"), new Variable("x")),
+                                                new VarDecStmt(new VarDec(new VoidType(), new Variable("x")),
                                                                 new IntLiteralExp(0)),
                                                 0),
                                 parser.parseVardecStmt(0));
@@ -79,7 +79,7 @@ public class ParserTest {
                                 new AssignmentToken(), new IntLiteralToken(0)));
                 assertEquals(
                                 new ParseResult<Stmt>(
-                                                new VarDecStmt(new VarDec(new TypeToken("Int"), new Variable("x")),
+                                                new VarDecStmt(new VarDec(new IntType(), new Variable("x")),
                                                                 new IntLiteralExp(0)),
                                                 0),
                                 parser.parseVardecStmt(0));
@@ -91,7 +91,7 @@ public class ParserTest {
                 final Parser parser = new Parser(Arrays.asList(new IntToken(), new Variable("x")));
                 assertEquals(
                                 new ParseResult<VarDec>(
-                                                new VarDec(new TypeToken("Int"), new Variable("x")),
+                                                new VarDec(new IntType(), new Variable("x")),
                                                 0),
                                 parser.parseVardec(0));
         }
@@ -102,7 +102,7 @@ public class ParserTest {
                 final Parser parser = new Parser(Arrays.asList(new VoidToken(), new Variable("x")));
                 assertEquals(
                                 new ParseResult<VarDec>(
-                                                new VarDec(new TypeToken("Void"), new Variable("x")),
+                                                new VarDec(new VoidType(), new Variable("x")),
                                                 0),
                                 parser.parseVardec(0));
         }
@@ -113,7 +113,7 @@ public class ParserTest {
                 final Parser parser = new Parser(Arrays.asList(new Variable("x"), new IntToken(), new Variable("x")));
                 assertEquals(
                                 new ParseResult<VarDec>(
-                                                new VarDec(new TypeToken("Int"), new Variable("x")),
+                                                new VarDec(new IntType(), new Variable("x")),
                                                 0),
                                 parser.parseVardec(0));
         }
@@ -123,14 +123,14 @@ public class ParserTest {
 
                 // instancedec
                 // vardec
-                VarDec vardec = new VarDec(new TypeToken("Int"), new Variable("f"));
+                VarDec vardec = new VarDec(new IntType(), new Variable("f"));
                 final Parser parser = new Parser(
                                 Arrays.asList(new TypeToken("Int"), new Variable("f"), new EqualsToken(),
                                                 new IntLiteralToken(0)));
 
                 assertEquals(
                                 new ParseResult<Stmt>(
-                                                new InstanceDec(new VarDec(new TypeToken("Int"), new Variable("f")),
+                                                new InstanceDec(new VarDec(new IntType(), new Variable("f")),
                                                                 new IntLiteralExp(0)),
                                                 0),
                                 parser.parseInstanceDec(0));
@@ -410,7 +410,7 @@ public class ParserTest {
                 // type methodname(vardec*) stmt
 
                 List<VarDec> arguments = new ArrayList<VarDec>();
-                arguments.add(new VarDec(new TypeToken("Int"), new Variable("x")));
+                arguments.add(new VarDec(new IntType(), new Variable("x")));
                 // arguments.add(new VarDec(new TypeToken("Int"), new Variable("y")));
 
                 final Parser parser = new Parser(Arrays.asList(
@@ -436,7 +436,7 @@ public class ParserTest {
                 // type methodname(vardec*) stmt
 
                 List<VarDec> arguments = new ArrayList<VarDec>();
-                arguments.add(new VarDec(new TypeToken("Int"), new Variable("x")));
+                arguments.add(new VarDec(new IntType(), new Variable("x")));
                 // arguments.add(new VarDec(new TypeToken("Int"), new Variable("y")));
 
                 final Parser parser = new Parser(Arrays.asList(
@@ -464,21 +464,21 @@ public class ParserTest {
                 // methoddef }
 
                 InstanceDec instanceDec = new InstanceDec(new VarDec(
-                                new TypeToken("Int"), new Variable("a")), new IntLiteralExp(0));
+                        new IntType(), new Variable("a")), new IntLiteralExp(0));
 
                 List<VarDec> vardecs = new ArrayList<VarDec>();
-                vardecs.add(new VarDec(new TypeToken("Int"), new Variable("x")));
-                vardecs.add(new VarDec(new TypeToken("Int"), new Variable("x")));
+                vardecs.add(new VarDec(new IntType(), new Variable("x")));
+                vardecs.add(new VarDec(new IntType(), new Variable("x")));
 
                 List<VarDec> instanceVariables = new ArrayList<VarDec>();
-                vardecs.add(new VarDec(new TypeToken("Int"), new Variable("a")));
-                vardecs.add(new VarDec(new TypeToken("Int"), new Variable("a")));
+                vardecs.add(new VarDec(new IntType(), new Variable("a")));
+                vardecs.add(new VarDec(new IntType(), new Variable("a")));
 
                 MethodDef methodDef = new MethodDef(new IntType(), new MethodName("testMethod"),
                                 vardecs, new ReturnVoidStmt());
 
                 MethodDefToken methodDefToken = new MethodDefToken(methodDef);
-                VarDec varDec = new VarDec(new TypeToken("Int"), new Variable("a"));
+                VarDec varDec = new VarDec(new IntType(), new Variable("a"));
 
                 final List<Stmt> superBody = new ArrayList<Stmt>();
                 superBody.add(new ReturnVoidStmt());
@@ -497,7 +497,7 @@ public class ParserTest {
                 );
 
                 assertEquals(new ParseResult<ClassDef>(new ClassDef(
-                                new VariableExp(new Variable("bob")),
+                                new ClassNameExp(new ClassNameToken("bob")),
                                 new VariableExp(new Variable("test")),
                                 instanceVariables, vardecs, superBody, methods
 
@@ -514,21 +514,21 @@ public class ParserTest {
                 // methoddef* }
 
                 InstanceDec instanceDec = new InstanceDec(new VarDec(
-                                new TypeToken("Int"), new Variable("a")), new IntLiteralExp(0));
+                        new IntType(), new Variable("a")), new IntLiteralExp(0));
 
                 List<VarDec> vardecs = new ArrayList<VarDec>();
-                vardecs.add(new VarDec(new TypeToken("Int"), new Variable("x")));
-                vardecs.add(new VarDec(new TypeToken("Int"), new Variable("x")));
+                vardecs.add(new VarDec(new IntType(), new Variable("x")));
+                vardecs.add(new VarDec(new IntType(), new Variable("x")));
 
                 List<VarDec> instanceVariables = new ArrayList<VarDec>();
-                vardecs.add(new VarDec(new TypeToken("Int"), new Variable("a")));
-                vardecs.add(new VarDec(new TypeToken("Int"), new Variable("a")));
+                vardecs.add(new VarDec(new IntType(), new Variable("a")));
+                vardecs.add(new VarDec(new IntType(), new Variable("a")));
 
                 MethodDef methodDef = new MethodDef(new IntType(), new MethodName("testMethod"),
                                 vardecs, new ReturnVoidStmt());
 
                 MethodDefToken methodDefToken = new MethodDefToken(methodDef);
-                VarDec varDec = new VarDec(new TypeToken("Int"), new Variable("a"));
+                VarDec varDec = new VarDec(new IntType(), new Variable("a"));
 
                 final List<Stmt> superBody = new ArrayList<Stmt>();
                 superBody.add(new ReturnVoidStmt());
@@ -547,7 +547,7 @@ public class ParserTest {
                 );
 
                 assertEquals(new ParseResult<ClassDef>(new ClassDef(
-                                new VariableExp(new Variable("bob")),
+                                new ClassNameExp(new ClassNameToken("bob")),
                                 new VariableExp(new Variable("test")),
                                 instanceVariables, vardecs, superBody, methods
 
