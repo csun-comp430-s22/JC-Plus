@@ -2,7 +2,8 @@ package typechecker;
 
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
+import java.util.HashSet;
 
 import parser.*;
 
@@ -13,6 +14,7 @@ import java.util.HashMap;
 // doesn't typecheck: ill-typed: some number of type errors (>0)
 
 public class Typechecker {
+    public static final String BASE_CLASS_NAME = "Object";
     // Things to track:
     // 1.) Variables in scope, and their types
     // 2.) Classes available, parameters constructors take, methods they have, what their parent
@@ -27,18 +29,105 @@ public class Typechecker {
     // 4. Is this given class a subclass of another class?
     // 5. Does our class hierarchy form a tree?
 
-    public final List<ClassDef> classes;
+    public final Map<ClassNameToken, ClassDef> classes;
+
+    // includes inherited methods
+    public final Map<ClassNameToken, Map<MethodName, MethodDef>> methods;
+
     public final Program program;
-    
-    // recommended: ClassName -> All Methods on the Class
-    // recommended: ClassName -> ParentClass
-    public Typechecker(final Program program) {
-        this.program = program;
-        this.classes = program.classes; // Osher: added this to parser program.java file to avoid error
-        // TODO: check that class hierarchy is a tree
+
+    public static ClassDef getClass(final ClassNameToken className,
+    final Map<ClassNameToken, ClassDef> classes) throws TypeErrorException {
+if (className.name.equals(BASE_CLASS_NAME)) {
+return null;
+} else {
+final ClassDef classDef = classes.get(className);
+if (classDef == null) {
+throw new TypeErrorException("no such class: " + className);
+} else {
+return classDef;
+}
+}
+}
+public ClassDef getClass(final ClassNameToken className) throws TypeErrorException {
+    return getClass(className, classes);
+}
+public static ClassDef getParent(final ClassNameToken className,
+final Map<ClassNameToken, ClassDef> classes) throws TypeErrorException {
+final ClassDef classDef = getClass(className, classes);
+return getClass(classDef.extendsClassName, classes);
+}
+public ClassDef getParent(final ClassNameToken className) throws TypeErrorException {
+    return getParent(className, classes);
+}
+public static void assertInheritanceNonCyclicalForClass(final ClassDef classDef,
+final Map<ClassNameToken, ClassDef> classes) throws TypeErrorException {
+final Set<ClassNameToken> seenClasses = new HashSet<ClassNameToken>();
+seenClasses.add(classDef.className);
+ClassDef parentClassDef = getParent(classDef.className, classes);
+while (parentClassDef != null) {
+final ClassNameToken parentClassName = parentClassDef.className;
+if (seenClasses.contains(parentClassName)) {
+throw new TypeErrorException("cyclic inheritance involving: " + parentClassName);
+}
+seenClasses.add(parentClassName);
+parentClassDef = getParent(parentClassName, classes);
+}
+}
+public static void assertInheritanceNonCyclical(final Map<ClassNameToken, ClassDef> classes) throws TypeErrorException {
+    for (final ClassDef classDef : classes.values()) {
+        assertInheritanceNonCyclicalForClass(classDef, classes);
+    }
+}
+// includes inherited methods
+    // duplicates are not permitted within the same class, but it's ok to override a superclass' method
+    public static Map<MethodName, MethodDef> methodsForClass(final ClassNameToken className,
+                                                             final Map<ClassNameToken, ClassDef> classes) throws TypeErrorException {
+        final ClassDef classDef = getClass(className, classes);
+        if (classDef == null) {
+            return new HashMap<MethodName, MethodDef>();
+        } else {
+            final Map<MethodName, MethodDef> retval = methodsForClass(classDef.extendsClassName, classes);
+            final Set<MethodName> methodsOnThisClass = new HashSet<MethodName>();
+            for (final MethodDef methodDef : classDef.methods) {
+                final MethodName methodName = methodDef.methodName;
+                if (methodsOnThisClass.contains(methodName)) {
+                    throw new TypeErrorException("duplicate method: " + methodName);
+                }
+                methodsOnThisClass.add(methodName);
+                retval.put(methodName, methodDef);
+            }
+            return retval;
+        }
+    }
+public static Map<ClassNameToken, Map<MethodName, MethodDef>> makeMethodMap(final Map<ClassNameToken, ClassDef> classes) throws TypeErrorException {
+    final Map<ClassNameToken, Map<MethodName, MethodDef>> retval = new HashMap<ClassNameToken, Map<MethodName, MethodDef>>();
+    for (final ClassNameToken className : classes.keySet()) {
+        retval.put(className, methodsForClass(className, classes));
+    }
+    return retval;
+}
+  // also makes sure inheritance hierarchies aren't cyclical
+  public static Map<ClassNameToken, ClassDef> makeClassMap(final List<ClassDef> classes) throws TypeErrorException {
+    final Map<ClassNameToken, ClassDef> retval = new HashMap<ClassNameToken, ClassDef>();
+    for (final ClassDef classDef : classes) {
+        final ClassNameToken className = classDef.className;
+        if (retval.containsKey(classDef.className)) {
+            throw new TypeErrorException("Duplicate class name: " + className);
+        }
     }
 
-    public Type typeofVariable(final VariableExp exp,
+    assertInheritanceNonCyclical(retval);
+
+    return retval;
+}
+
+public Typechecker(final Program program) throws TypeErrorException {
+    this.program = program;
+    classes = makeClassMap(program.classes);
+    methods = makeMethodMap(classes);
+}
+public Type typeofVariable(final VariableExp exp,
                                final Map<Variable, Type> typeEnvironment) throws TypeErrorException {
         final Type mapType = typeEnvironment.get(exp.variable);
         if (mapType == null) {
@@ -48,7 +137,7 @@ public class Typechecker {
         }
     }
 
-    public Type typeofThis(final ClassNameExp classWeAreIn) throws TypeErrorException { //Osher: in Deweys file, he had classname so i changed it to classnameExp to match what dewey did
+    public Type typeofThis(final ClassNameToken classWeAreIn) throws TypeErrorException { //Osher: in Deweys file, he had classname so i changed it to classnameExp to match what dewey did
         if (classWeAreIn == null) {
             throw new TypeErrorException("this used in the entry point");
         } else {
@@ -58,7 +147,7 @@ public class Typechecker {
 
     public Type typeofOp(final OpExp exp,
                          final Map<Variable, Type> typeEnvironment,
-                         final ClassNameExp classWeAreIn) throws TypeErrorException {
+                         final ClassNameToken classWeAreIn) throws TypeErrorException {
         final Type leftType = typeof(exp.left, typeEnvironment, classWeAreIn);
         final Type rightType = typeof(exp.right, typeEnvironment, classWeAreIn);   //Osher: not exactly certain where this function is coming from
         // (leftType, exp.op, rightType) match {
@@ -123,11 +212,23 @@ public class Typechecker {
         }
     }
 
-    public Type expectedReturnTypeForClassAndMethod(final ClassNameExp className,  //Osher: changed to classnameexp
-                                                    final MethodName methodName) {
-        // WRONG - needs to find the given class and method, and return the expected
-        // return type for this
-        return null;
+    public MethodDef getMethodDef(final ClassNameToken className,
+                                  final MethodName methodName) throws TypeErrorException {
+        final Map<MethodName, MethodDef> methodMap = methods.get(className);
+        if (methodMap == null) {
+            throw new TypeErrorException("Unknown class name: " + className);
+        } else {
+            final MethodDef methodDef = methodMap.get(methodName);
+            if (methodDef == null) {
+                throw new TypeErrorException("Unknown method name " + methodName + " for class " + className);
+            } else {
+                return methodDef;
+            }
+        }
+    }
+    public Type expectedReturnTypeForClassAndMethod(final ClassNameToken className,  //Osher: changed to classnameexp
+                                                    final MethodName methodName) throws TypeErrorException {
+                                                        return getMethodDef(className, methodName).returnType;
     }
 
     // Doesn't handle access modifiers right now; would be to know which class we
@@ -158,34 +259,26 @@ public class Typechecker {
     // for every class:
     //   - Methods on that class
     //   - Methods on the parent of that class
-    public List<Type> expectedParameterTypesForClassAndMethod(final ClassNameExp className,
+    public List<Type> expectedParameterTypesForClassAndMethod(final ClassNameToken className,
                                                               final MethodName methodName)
         throws TypeErrorException {
-        for (final ClassDef candidateClass : classes) {
-            if (candidateClass.className.equals(className)) {
-                for (final MethodDef candidateMethod : candidateClass.methods) {
-                    if (candidateMethod.methodName.equals(methodName)) {
-                        final List<Type> expectedTypes = new ArrayList<Type>();
-                        for (final VarDec vardec : candidateMethod.arguments) {
-                            expectedTypes.add(vardec.type);  //OsherL didnt want to break vardec so left as is
-                        }
-                        return expectedTypes;
-                    }
-                }
+            final MethodDef methodDef = getMethodDef(className, methodName);
+            final List<Type> retval = new ArrayList<Type>();
+            for (final VarDec vardec : methodDef.arguments) {
+                retval.add(vardec.type);
             }
-        }
-
-        throw new TypeErrorException("No method named " + methodName + " on class " + className);
+            return retval;
     }
 
-    public boolean isSubtypeOf(final Type first, final Type second) throws TypeErrorException {
-        // WRONG: needs to check this
-        return true;
-    }
-    
-    public void isEqualOrSubtypeOf(final Type first, final Type second) throws TypeErrorException {
-        if (!(first.equals(second) || isSubtypeOf(first, second))) {
-            throw new TypeErrorException("types incompatible: " + first + ", " + second);
+    public void assertEqualOrSubtypeOf(final Type first, final Type second) throws TypeErrorException {
+        if (first.equals(second)) {
+            return;
+        } else if (first instanceof ClassNameType &&
+                   second instanceof ClassNameType) {
+            final ClassDef parentClassDef = getParent(((ClassNameType)first).className);
+            assertEqualOrSubtypeOf(new ClassNameType(parentClassDef.className), second);
+        } else {
+            throw new TypeErrorException("incompatible types: " + first + ", " + second);
         }
     }
 
@@ -194,7 +287,7 @@ public class Typechecker {
     public void expressionsOk(final List<Type> expectedTypes,
                               final List<Exp> receivedExpressions,
                               final Map<Variable, Type> typeEnvironment,
-                              final ClassNameExp classWeAreIn) throws TypeErrorException {
+                              final ClassNameToken classWeAreIn) throws TypeErrorException {
         if (expectedTypes.size() != receivedExpressions.size()) {
             throw new TypeErrorException("Wrong number of parameters");
         }
@@ -206,7 +299,7 @@ public class Typechecker {
             //
             // myMethod2(BaseClass)
             // myMethod2(new SubClass())
-            isEqualOrSubtypeOf(paramType, expectedType);
+            assertEqualOrSubtypeOf(paramType, expectedType);
         }
     }
     
@@ -218,10 +311,10 @@ public class Typechecker {
     // target.methodName(params)
     public Type typeofMethodCall(final MethodCallExp exp,
                                  final Map<Variable, Type> typeEnvironment,
-                                 final ClassNameExp classWeAreIn) throws TypeErrorException {
+                                 final ClassNameToken classWeAreIn) throws TypeErrorException {
         final Type targetType = typeof(exp.target, typeEnvironment, classWeAreIn);  //Osher: not sure where typeof is coming from
         if (targetType instanceof ClassNameType) {
-            final ClassNameExp className = ((ClassNameType)targetType).className;
+            final ClassNameToken className = ((ClassNameType)targetType).className;
             final List<Type> expectedTypes =
                 expectedParameterTypesForClassAndMethod(className, exp.methodName);
             expressionsOk(expectedTypes, exp.params, typeEnvironment, classWeAreIn);
@@ -231,18 +324,25 @@ public class Typechecker {
         }
     }
 
-    public List<Type> expectedConstructorTypesForClass(final Exp className)
-        throws TypeErrorException {
-        // WRONG - needs to grab the expected constructor types for this class
-        // throws an exception if this class doesn't exception
-        return null;
+    public List<Type> expectedConstructorTypesForClass(final ClassNameToken className)
+    throws TypeErrorException {
+    final ClassDef classDef = getClass(className);
+    final List<Type> retval = new ArrayList<Type>();
+    if (classDef == null) { // Object
+        return retval;
+    } else {
+        for (final VarDec vardec : classDef.constructorArguments) {
+            retval.add(vardec.type);
+        }
+        return retval;
     }
+}
     
     // new classname(exp*)
     // new className(params)
     public Type typeofNew(final NewExp exp,
                           final Map<Variable, Type> typeEnvironment,
-                          final ClassNameExp classWeAreIn) throws TypeErrorException {
+                          final ClassNameToken classWeAreIn) throws TypeErrorException {
         // need to know what the constructor arguments for this class are
         final List<Type> expectedTypes = expectedConstructorTypesForClass(exp.className);   //Osher: didnt make edits here in order not to break code
         expressionsOk(expectedTypes, exp.params, typeEnvironment, classWeAreIn);
@@ -252,7 +352,7 @@ public class Typechecker {
     // classWeAreIn is null if we are in the entry point
     public Type typeof(final Exp exp,
                        final Map<Variable, Type> typeEnvironment,
-                       final ClassNameExp classWeAreIn) throws TypeErrorException {
+                       final ClassNameToken classWeAreIn) throws TypeErrorException {
         if (exp instanceof IntLiteralExp) {
             return new IntType();
         } else if (exp instanceof VariableExp) {
@@ -284,15 +384,15 @@ public class Typechecker {
 
     public Map<Variable, Type> isWellTypedVar(final VariableInitializationStmt stmt,
                                               final Map<Variable, Type> typeEnvironment,
-                                              final ClassNameExp classWeAreIn) throws TypeErrorException {
+                                              final ClassNameToken classWeAreIn) throws TypeErrorException {
         final Type expType = typeof(stmt.exp, typeEnvironment, classWeAreIn);
-        isEqualOrSubtypeOf(expType, stmt.vardec.type);
+        assertEqualOrSubtypeOf(expType, stmt.vardec.type);
         return addToMap(typeEnvironment, stmt.vardec.variable, stmt.vardec.type);   //Osher: not sure about these functions and do not want to break code
     }
 
     public Map<Variable, Type> isWellTypedIf(final IfExp stmt,   //Osher: this if implements statement even tho its called ifexp
                                              final Map<Variable, Type> typeEnvironment,
-                                             final ClassNameExp classWeAreIn,
+                                             final ClassNameToken classWeAreIn,
                                              final Type functionReturnType) throws TypeErrorException {
         if (typeof(stmt.guard, typeEnvironment, classWeAreIn) instanceof IntType) {
             isWellTypedStmt(stmt.trueBranch, typeEnvironment, classWeAreIn, functionReturnType);   //Osher: not sure how to rework this for our language
@@ -305,7 +405,7 @@ public class Typechecker {
 
     public Map<Variable, Type> isWellTypedWhile(final WhileStmt stmt,
                                                 final Map<Variable, Type> typeEnvironment,
-                                                final ClassNameExp classWeAreIn,
+                                                final ClassNameToken classWeAreIn,
                                                 final Type functionReturnType) throws TypeErrorException {
         if (typeof(stmt.guard, typeEnvironment, classWeAreIn) instanceof IntType) {
             isWellTypedStmt(stmt.body, typeEnvironment, classWeAreIn, functionReturnType); //Osher: not sure how to rework this for our language
@@ -317,7 +417,7 @@ public class Typechecker {
 
     public Map<Variable, Type> isWellTypedBlock(final BlockStmt stmt,
                                                 Map<Variable, Type> typeEnvironment,
-                                                final ClassNameExp classWeAreIn,
+                                                final ClassNameToken classWeAreIn,
                                                 final Type functionReturnType) throws TypeErrorException {
         for (final Stmt bodyStmt : stmt.stmts) {
             typeEnvironment = isWellTypedStmt(bodyStmt, typeEnvironment, classWeAreIn, functionReturnType);
@@ -328,19 +428,19 @@ public class Typechecker {
     // return exp;
     public Map<Variable, Type> isWellTypedReturnNonVoid(final ReturnNonVoidStmt stmt,
                                                         final Map<Variable, Type> typeEnvironment,
-                                                        final ClassNameExp classWeAreIn,
+                                                        final ClassNameToken classWeAreIn,
                                                         final Type functionReturnType) throws TypeErrorException {
         if (functionReturnType == null) {
             throw new TypeErrorException("return in program entry point");
         } else {
             final Type receivedType = typeof(stmt.exp, typeEnvironment, classWeAreIn);
-            isEqualOrSubtypeOf(receivedType, functionReturnType);
+            assertEqualOrSubtypeOf(receivedType, functionReturnType);
             return typeEnvironment;
         }
     }
 
     public Map<Variable, Type> isWellTypedReturnVoid(final Map<Variable, Type> typeEnvironment,
-                                                     final ClassNameExp classWeAreIn,
+                                                     final ClassNameToken classWeAreIn,
                                                      final Type functionReturnType) throws TypeErrorException {
         if (functionReturnType == null) {
             throw new TypeErrorException("return in program entry point");
@@ -358,7 +458,7 @@ public class Typechecker {
     // }
     public Map<Variable, Type> isWellTypedStmt(final Stmt stmt,
                                                final Map<Variable, Type> typeEnvironment,
-                                               final ClassNameExp classWeAreIn,
+                                               final ClassNameToken classWeAreIn,
                                                final Type functionReturnType) throws TypeErrorException {
         if (stmt instanceof ExpStmt) {   //Osher: no idea what dewey is doing here
             typeof(((ExpStmt)stmt).exp, typeEnvironment, classWeAreIn);
@@ -386,21 +486,40 @@ public class Typechecker {
     // methoddef ::= type methodname(vardec*) stmt
     public void isWellTypedMethodDef(final MethodDef method,
                                      Map<Variable, Type> typeEnvironment, // instance variables
-                                     final ClassNameExp classWeAreIn) throws TypeErrorException {
+                                     final ClassNameToken classWeAreIn) throws TypeErrorException {
         // starting type environment: just instance variables
-        // int addTwo(int x, int y) { return x + y; }
-        //
-        // int x;
-        // int addTwo(bool x, int x) { return x; }
+        final Set<Variable> variablesInMethod = new HashSet<Variable>();
         for (final VarDec vardec : method.arguments) {
+            final Variable variable = vardec.variable;
+            if (variablesInMethod.contains(variable)) {
+                throw new TypeErrorException("Duplicate variable in method definition: " + variable);
+            }
+            variablesInMethod.add(variable);
             // odd semantics: last variable declaration shadows prior one
-            typeEnvironment = addToMap(typeEnvironment, vardec.variable, vardec.type);
+            typeEnvironment = addToMap(typeEnvironment, variable, vardec.type);
         }
         
         isWellTypedStmt(method.body,
                         typeEnvironment, // instance variables + parameters
                         classWeAreIn,
                         method.returnType);
+    }
+
+    public Map<Variable, Type> baseTypeEnvironmentForClass(final ClassNameToken className) throws TypeErrorException {
+        final ClassDef classDef = getClass(className);
+        if (classDef == null) {
+            return new HashMap<Variable, Type>();
+        } else {
+            final Map<Variable, Type> retval = baseTypeEnvironmentForClass(classDef.extendsClassName);
+            for (final VarDec instanceVariable : classDef.instanceVariables) {
+                final Variable variable = instanceVariable.variable;
+                if (retval.containsKey(variable)) {
+                    throw new TypeErrorException("Duplicate instance variable (possibly inherited): " + variable);
+                }
+                retval.put(variable, instanceVariable.type);
+            }
+            return retval;
+        }
     }
 
     // classdef ::= class classname extends classname {
@@ -422,16 +541,22 @@ public class Typechecker {
         //   bool x;
         //   ...
         // }
-        Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
-        for (final VarDec vardec : classDef.instanceVariables) {
-            typeEnvironment = addToMap(typeEnvironment, vardec.variable, vardec.type);
-        }
-        
-        // check constructor
+        final Map<Variable, Type> typeEnvironment = baseTypeEnvironmentForClass(classDef.className);
+        final Set<Variable> variablesInConstructor = new HashSet<Variable>();
         Map<Variable, Type> constructorTypeEnvironment = typeEnvironment;
         for (final VarDec vardec : classDef.constructorArguments) {
-            constructorTypeEnvironment = addToMap(constructorTypeEnvironment, vardec.variable, vardec.type);
+            final Variable variable = vardec.variable;
+            if (variablesInConstructor.contains(variable)) {
+                throw new TypeErrorException("Duplicate variable in constructor param: " + variable);
+            }
+            variablesInConstructor.add(variable);
+            constructorTypeEnvironment = addToMap(constructorTypeEnvironment, variable, vardec.type);
         }
+      //  expressionsOk(expectedConstructorTypesForClass(classDef.extendsClassName),
+        //classDef.constructorArguments,
+        //constructorTypeEnvironment,
+        //lassDef.className);
+      
         // check call to super
     
         isWellTypedBlock(new BlockStmt(classDef.superBody),

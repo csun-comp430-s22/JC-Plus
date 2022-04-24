@@ -1,9 +1,9 @@
 package parser;
 
 public class ClassNameType implements Type {
-    public final ClassNameExp className;
+    public final ClassNameToken className;
 
-    public ClassNameType(final ClassNameExp className) {
+    public ClassNameType(final ClassNameToken className) {
         this.className = className;
     }
 

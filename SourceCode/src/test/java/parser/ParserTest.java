@@ -497,8 +497,8 @@ public class ParserTest {
                 );
 
                 assertEquals(new ParseResult<ClassDef>(new ClassDef(
-                                new ClassNameExp(new ClassNameToken("bob")),
-                                new VariableExp(new Variable("test")),
+                        new ClassNameToken("bob"),
+                        new ClassNameToken("test"),
                                 instanceVariables, vardecs, superBody, methods
 
                 ), 1),
@@ -547,8 +547,8 @@ public class ParserTest {
                 );
 
                 assertEquals(new ParseResult<ClassDef>(new ClassDef(
-                                new ClassNameExp(new ClassNameToken("bob")),
-                                new VariableExp(new Variable("test")),
+                                new ClassNameToken("bob"),
+                                new ClassNameToken("test"),
                                 instanceVariables, vardecs, superBody, methods
 
                 ), 1),

@@ -542,10 +542,12 @@ public class Parser {
             // constructor(vardec*) stmt* // vardecs are comma-sep
             // methoddef* }
 
-            final ParseResult<ClassNameExp> className = parseClass(position + 1); // skip whitespace after class
+            final ParseResult<ClassNameExp> className = parseClass(position + 1); 
+            final ClassNameToken aclassname= new ClassNameToken(className.result.toString());// Alexis (Maybe)
+            // skip whitespace after class
             assertTokenHereIs(className.position, new ExtendsToken());
             final ParseResult<Exp> extendsClassName = parseSecondaryExp(className.position + 1);
-
+                final ClassNameToken eclassname= new ClassNameToken(extendsClassName.result.toString());// Alexis Also maybe
             assertTokenHereIs(extendsClassName.position, new parser.LeftCurlyToken());
 
             // instancedec*
@@ -619,7 +621,7 @@ public class Parser {
 
             assertTokenHereIs(curPosition, new parser.RightCurlyToken()); // }
 
-            return new ParseResult<ClassDef>(new ClassDef(className.result, extendsClassName.result, instanceVariables,
+            return new ParseResult<ClassDef>(new ClassDef(aclassname, eclassname, instanceVariables,
                     constructorArguments, superBody, methods), // Implement
                                                                // exp.methodname
                                                                // stmt?????
