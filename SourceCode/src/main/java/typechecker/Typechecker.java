@@ -431,7 +431,7 @@ assertEqualOrSubtypeOf(expType, variableType);
 return typeEnvironment;
 }
 
-    public Map<Variable, Type> isWellTypedIf(final IfExp stmt, // Osher: this if implements statement even tho its
+    public Map<Variable, Type> isWellTypedIf(final IfStmt stmt, // Osher: this if implements statement even tho its
                                                                // called ifexp
             final Map<Variable, Type> typeEnvironment,
             final ClassNameToken classWeAreIn,
@@ -513,8 +513,8 @@ return typeEnvironment;
             return isWellTypedVar((VariableInitializationStmt) stmt, typeEnvironment, classWeAreIn);
         } else if (stmt instanceof AssignmentStmt) {
             return isWellTypedAssign((AssignmentStmt)stmt, typeEnvironment, classWeAreIn);
-        }else if (stmt instanceof IfExp) {
-            return isWellTypedIf((IfExp) stmt, typeEnvironment, classWeAreIn, functionReturnType);
+        }else if (stmt instanceof IfStmt) {
+            return isWellTypedIf((IfStmt) stmt, typeEnvironment, classWeAreIn, functionReturnType);
         } else if (stmt instanceof WhileStmt) {
             return isWellTypedWhile((WhileStmt) stmt, typeEnvironment, classWeAreIn, functionReturnType);
         } else if (stmt instanceof ReturnNonVoidStmt) {

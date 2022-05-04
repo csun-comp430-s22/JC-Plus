@@ -1,11 +1,11 @@
 package parser;
 
-public class IfExp implements Stmt {
+public class IfStmt implements Stmt {
     public final Exp guard;
     public final Stmt trueBranch;
     public final Stmt falseBranch;
 
-    public IfExp(final Exp guard,
+    public IfStmt(final Exp guard,
                   final Stmt trueBranch,
                   final Stmt falseBranch) {
         this.guard = guard;
@@ -14,8 +14,8 @@ public class IfExp implements Stmt {
     }
 
     public boolean equals(final Object other) {
-        if (other instanceof IfExp) {
-            final IfExp otherStmt = (IfExp)other;
+        if (other instanceof IfStmt) {
+            final IfStmt otherStmt = (IfStmt)other;
             return (guard.equals(otherStmt.guard) &&
                     trueBranch.equals(otherStmt.trueBranch) &&
                     falseBranch.equals(otherStmt.falseBranch));

@@ -100,7 +100,7 @@ public class TypecheckerTest {
     public void iftest() throws TypeErrorException{
         final Map<Variable,Type> expectedType = new HashMap<Variable, Type>();
        expectedType.put(new Variable("x"), new IntType());
-        final IfExp ifexp = new IfExp(new IntLiteralExp(1), new ReturnVoidStmt(), new ReturnVoidStmt());
+        final IfStmt ifexp = new IfStmt(new IntLiteralExp(1), new ReturnVoidStmt(), new ReturnVoidStmt());
         final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
         typeEnvironment.put(new Variable("x"), new IntType());
         final ClassNameToken classes= new ClassNameToken("foo");

@@ -384,7 +384,7 @@ public class Parser {
             final ParseResult<Stmt> trueBranch = parseStmt(guard.position + 1);
             assertTokenHereIs(trueBranch.position, new ElseToken());
             final ParseResult<Stmt> falseBranch = parseStmt(trueBranch.position+1);
-            return new ParseResult<Stmt>(new IfExp(guard.result,
+            return new ParseResult<Stmt>(new IfStmt(guard.result,
                     trueBranch.result,
                     falseBranch.result),
                     falseBranch.position + 1);

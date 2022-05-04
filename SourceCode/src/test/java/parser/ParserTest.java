@@ -298,7 +298,7 @@ public class ParserTest {
                                 new ReturnToken(),
                                 new SemicolonToken(), new ElseToken(), new ReturnToken(), new SemicolonToken()));
 
-                assertEquals(new ParseResult<Stmt>(new IfExp(
+                assertEquals(new ParseResult<Stmt>(new IfStmt(
                                 new IntLiteralExp(0), new ReturnVoidStmt(), new ReturnVoidStmt()), 1),
                                 parser.parseStmt(0));
         }
