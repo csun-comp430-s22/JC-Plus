@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -197,6 +198,50 @@ public class TypecheckerTest {
     }
 
     @Test
+    public void typeOfVariableExp() throws TypeErrorException {
+        final Type expectedType = new IntType();
+        final VariableExp var = new VariableExp(new Variable("x"));
+        final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
+        typeEnvironment.put(new Variable("x"), new IntType());
+        final ClassNameToken classes = new ClassNameToken("foo");
+        final Type receivedType = emptyTypechecker().typeof(var, typeEnvironment, classes);
+        assertEquals(expectedType, receivedType);
+    }
+
+    @Test
+    public void typeOfOpExp() throws TypeErrorException {
+        final Type expectedType = new IntType();
+        final OpExp op = new OpExp(new IntLiteralExp(1), new EqualsOp(), new IntLiteralExp(2));
+        final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
+        typeEnvironment.put(new Variable("x"), new IntType());
+        final ClassNameToken classes = new ClassNameToken("foo");
+        final Type receivedType = emptyTypechecker().typeof(op, typeEnvironment, classes);
+        assertEquals(expectedType, receivedType);
+    }
+
+    @Test
+    public void typeOfMethodCallExp() throws TypeErrorException {   // doesnt test methodcallexp, might need to implement type and refactor parser
+        final ClassNameToken class_name = new ClassNameToken("foo");
+        final Type expectedType = new ClassNameType(class_name);
+        final MethodCallExp method_call = new MethodCallExp(new ClassNameExp(class_name), new MethodName("x"), Arrays.asList(
+            new VariableExp(new Variable("x"))));
+        final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
+        typeEnvironment.put(new Variable("x"), new IntType());
+        final ClassNameToken classes = new ClassNameToken("foo");
+        final Type receivedType = emptyTypechecker().typeof(method_call, typeEnvironment, classes);
+        assertEquals(expectedType, receivedType);
+    }
+
+    @Test
+    public void typeOfNew() throws TypeErrorException {
+        final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
+        typeEnvironment.put(new Variable("x"), new IntType());
+        assertEquals(new ClassNameType(new ClassNameToken("foo")),
+                emptyTypechecker().typeofNew(new NewExp(new ClassNameToken("foo"),  Arrays.asList(
+                    new VariableExp(new Variable("x")))), typeEnvironment, new ClassNameToken("foo")));
+    }
+
+    @Test
     public void WellTypedIfStmtTest() throws TypeErrorException {
         final Map<Variable, Type> expectedType = new HashMap<Variable, Type>();
         expectedType.put(new Variable("x"), new IntType());
@@ -291,7 +336,7 @@ public class TypecheckerTest {
         final Map<Variable, Type> expectedType = new HashMap<Variable, Type>();
         expectedType.put(new Variable("x"), new IntType());
 
-        final AssignmentStmt assignmentStmt = new AssignmentStmt(new Variable("f"), new IntLiteralExp(1));
+        final AssignmentStmt assignmentStmt = new AssignmentStmt(new Variable("x"), new IntLiteralExp(1));
         final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
         typeEnvironment.put(new Variable("x"), new IntType());
         final ClassNameToken classes = new ClassNameToken("foo");
@@ -371,7 +416,7 @@ public class TypecheckerTest {
     public void WellTypedClassDefTest() throws TypeErrorException {
         // TODO: needs to be fixed not working properly...
 
-        // final Void expectedType = new Void();
+        final VoidType expectedType = new VoidType();
 
         final AssignmentStmt assignmentStmt = new AssignmentStmt(new Variable("f"), new IntLiteralExp(1));
         final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
@@ -393,8 +438,8 @@ public class TypecheckerTest {
         final ClassDef classDef = new ClassDef(className, extendsClassName, instanceVariables, constructorArguments,
                 superBody, methods);
 
-        // final Void receivedType = emptyTypechecker().isWellTypedClassDef(classDef);
-        // assertEquals(expectedType, receivedType);
+        //final Type receivedType = emptyTypechecker().isWellTypedClassDef(classDef);
+        //assertEquals(expectedType, receivedType);
     }
 
     @Test
