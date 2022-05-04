@@ -399,15 +399,15 @@ public class CodeGenerator {
         output.print(nameMangleConstructorName(classDef.extendsClassName).name);
         output.print("(");
         output.print(SELF_NAME);
-        if (!classDef.superParams.isEmpty()) {
+      /*  if (!classDef.superParams.isEmpty()) {
             output.print(", ");
             writeExps(classDef.superParams,
                       localVariables);
-        }
+        }*/
         output.println(");");
 
         // body
-        writeStmtsInNestedScopes(classDef.constructorBody.iterator(),
+        writeStmtsInNestedScopes(classDef.superBody.iterator(), //constructorBody is the same as superBody?
                                  localVariables);
         output.println("}");
     }
