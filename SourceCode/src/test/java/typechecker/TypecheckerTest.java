@@ -105,7 +105,7 @@ public class TypecheckerTest {
         typeEnvironment.put(new Variable("x"), new IntType());
         final ClassNameToken classes= new ClassNameToken("foo");
         final Type type2 = new VoidType();
-        final Map<Variable,Type> receivedType = emptyTypechecker().isWellTypedIf(ifexp, typeEnvironment, classes, type2);
+        final Map<Variable,Type> receivedType = emptyTypechecker().isWellTypedStmt(ifexp, typeEnvironment, classes, type2);
         assertEquals(expectedType, receivedType);
 
     }
