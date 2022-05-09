@@ -26,7 +26,7 @@ public class TypecheckerTest {
         final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
         typeEnvironment.put(new Variable("x"), new IntType());
         final ClassNameToken className = new ClassNameToken("foo");
-        final ClassNameToken extendsClassName = new ClassNameToken("f");
+        final ClassNameToken extendsClassName = new ClassNameToken("Object");
         List<VarDec> instanceVariables = new ArrayList<VarDec>();
         instanceVariables.add(new VarDec(new IntType(), new Variable("x")));
         List<VarDec> constructorArguments = new ArrayList<VarDec>();
@@ -452,10 +452,10 @@ public class TypecheckerTest {
     @Test
     public void baseTypeEnvironmentForClass() throws TypeErrorException {
         final Map<Variable, Type> expectedType = new HashMap<Variable, Type>();
-        expectedType.put(new Variable("x"), new IntType());
+        //expectedType.put(new Variable("x"), new IntType());
 
         final Map<Variable, Type> receivedType = emptyTypechecker()
-                .baseTypeEnvironmentForClass(new ClassNameToken("f"));
+                .baseTypeEnvironmentForClass(new ClassNameToken("Object"));
         assertEquals(expectedType, receivedType);
     }
 
@@ -495,7 +495,7 @@ public class TypecheckerTest {
 
         final ClassDef classDef = new ClassDef(className, extendsClassName, instanceVariables, constructorArguments,
                 superBody, methods);
-
+        emptyTypechecker().isWellTypedClassDef(classDef);
         //final Type receivedType = emptyTypechecker().isWellTypedClassDef(classDef);
         //assertEquals(expectedType, receivedType);
     }

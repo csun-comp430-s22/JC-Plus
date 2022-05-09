@@ -1,4 +1,4 @@
-
+/* 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
@@ -64,4 +64,4 @@ public class Compiler {
             compile(args[0], args[1]);
         }
     }
-}
+} */
