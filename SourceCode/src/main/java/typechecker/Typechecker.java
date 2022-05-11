@@ -502,6 +502,8 @@ return typeEnvironment;
     // int x = 17;
     // break;
     // }
+
+    //need to add break
     public Map<Variable, Type> isWellTypedStmt(final Stmt stmt,
             final Map<Variable, Type> typeEnvironment,
             final ClassNameToken classWeAreIn,
