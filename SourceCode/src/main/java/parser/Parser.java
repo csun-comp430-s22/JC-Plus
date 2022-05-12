@@ -546,9 +546,9 @@ public class Parser {
             final ClassNameToken aclassname= new ClassNameToken(className.result.toString());// Alexis (Maybe)
             // skip whitespace after class
             assertTokenHereIs(className.position, new ExtendsToken());
-            final ParseResult<Exp> extendsClassName = parseSecondaryExp(className.position + 1);
+            final ParseResult<Exp> extendsClassName = parseSecondaryExp(className.position);
                 final ClassNameToken eclassname= new ClassNameToken(extendsClassName.result.toString());// Alexis Also maybe
-            assertTokenHereIs(extendsClassName.position, new parser.LeftCurlyToken());
+            assertTokenHereIs(extendsClassName.position+1, new parser.LeftCurlyToken());
 
             // instancedec*
             final List<VarDec> instanceVariables = new ArrayList<VarDec>();

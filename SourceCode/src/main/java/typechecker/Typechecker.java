@@ -127,7 +127,7 @@ public class Typechecker {
             if (retval.containsKey(classDef.className)) {
                 throw new TypeErrorException("Duplicate class name: " + className);
             }
-            retval.put(className,classDef);
+            retval.put(className, classDef);
 
         }
 
@@ -141,8 +141,9 @@ public class Typechecker {
         classes = makeClassMap(program.classes);
         methods = makeMethodMap(classes);
     }
+
     public static Type getVariable(final Map<Variable, Type> typeEnvironment,
-                                   final Variable variable) throws TypeErrorException {
+            final Variable variable) throws TypeErrorException {
         final Type retval = typeEnvironment.get(variable);
         if (retval == null) {
             throw new TypeErrorException("Varible not in scope: " + variable.name);
@@ -150,19 +151,29 @@ public class Typechecker {
             return retval;
         }
     }
+
     public Type typeofVariable(final VariableExp exp,
-                               final Map<Variable, Type> typeEnvironment) throws TypeErrorException {
+            final Map<Variable, Type> typeEnvironment) throws TypeErrorException {
         return getVariable(typeEnvironment, exp.variable);
     }
 
     public Type typeofThis(final ClassNameToken classWeAreIn) throws TypeErrorException { // Osher: in Deweys file, he
                                                                                           // had classname so i changed
-                                                                                          // it to classnameExp to match                                                                                  // what dewey did
+                                                                                          // it to classnameExp to match
+                                                                                          // // what dewey did
         if (classWeAreIn == null) {
             throw new TypeErrorException("this used in the entry point");
         } else {
             return new ClassNameType(classWeAreIn); // Osher: we did not have a class name type in our parser and dewey
                                                     // did so i added it in
+        }
+    }
+
+    public Type typeofLength(final ClassNameToken classWeAreIn) throws TypeErrorException { 
+        if (classWeAreIn == null) {
+            throw new TypeErrorException("this used in the entry point");
+        } else {
+            return new ClassNameType(classWeAreIn); 
         }
     }
 
@@ -340,11 +351,10 @@ public class Typechecker {
         final Type targetType = typeof(exp.target, typeEnvironment, classWeAreIn); // Osher: not sure where typeof is
                                                                                    // coming from
         if (targetType instanceof ClassNameType) {
-            final ClassNameType asClassNameType = (ClassNameType)targetType;
+            final ClassNameType asClassNameType = (ClassNameType) targetType;
             exp.targetType = asClassNameType;
             final ClassNameToken className = asClassNameType.className;
-            final List<Type> expectedTypes =
-                expectedParameterTypesForClassAndMethod(className, exp.methodName);
+            final List<Type> expectedTypes = expectedParameterTypesForClassAndMethod(className, exp.methodName);
             expressionsOk(expectedTypes, exp.params, typeEnvironment, classWeAreIn);
             return expectedReturnTypeForClassAndMethod(className, exp.methodName);
         } else {
@@ -392,6 +402,8 @@ public class Typechecker {
           // return new BoolType();}
         else if (exp instanceof ThisExp) {
             return typeofThis(classWeAreIn);// done
+        } else if (exp instanceof LengthExp) {
+            return typeofLength(classWeAreIn);// done
         } else if (exp instanceof OpExp) {
             return typeofOp((OpExp) exp, typeEnvironment, classWeAreIn);// done
         } else if (exp instanceof MethodCallExp) {
@@ -422,17 +434,18 @@ public class Typechecker {
                                                                                   // functions and do not want to break
                                                                                   // code
     }
+
     public Map<Variable, Type> isWellTypedAssign(final AssignmentStmt stmt,
-    final Map<Variable, Type> typeEnvironment,
-    final ClassNameToken classWeAreIn) throws TypeErrorException {
-final Type expType = typeof(stmt.exp, typeEnvironment, classWeAreIn);
-final Type variableType = getVariable(typeEnvironment, stmt.var);
-assertEqualOrSubtypeOf(expType, variableType);
-return typeEnvironment;
-}
+            final Map<Variable, Type> typeEnvironment,
+            final ClassNameToken classWeAreIn) throws TypeErrorException {
+        final Type expType = typeof(stmt.exp, typeEnvironment, classWeAreIn);
+        final Type variableType = getVariable(typeEnvironment, stmt.var);
+        assertEqualOrSubtypeOf(expType, variableType);
+        return typeEnvironment;
+    }
 
     public Map<Variable, Type> isWellTypedIf(final IfStmt stmt, // Osher: this if implements statement even tho its
-                                                               // called ifexp
+                                                                // called ifexp
             final Map<Variable, Type> typeEnvironment,
             final ClassNameToken classWeAreIn,
             final Type functionReturnType) throws TypeErrorException {
@@ -503,7 +516,7 @@ return typeEnvironment;
     // break;
     // }
 
-    //need to add break
+    // need to add break
     public Map<Variable, Type> isWellTypedStmt(final Stmt stmt,
             final Map<Variable, Type> typeEnvironment,
             final ClassNameToken classWeAreIn,
@@ -514,8 +527,8 @@ return typeEnvironment;
         } else if (stmt instanceof VariableInitializationStmt) {
             return isWellTypedVar((VariableInitializationStmt) stmt, typeEnvironment, classWeAreIn);
         } else if (stmt instanceof AssignmentStmt) {
-            return isWellTypedAssign((AssignmentStmt)stmt, typeEnvironment, classWeAreIn);
-        }else if (stmt instanceof IfStmt) {
+            return isWellTypedAssign((AssignmentStmt) stmt, typeEnvironment, classWeAreIn);
+        } else if (stmt instanceof IfStmt) {
             return isWellTypedIf((IfStmt) stmt, typeEnvironment, classWeAreIn, functionReturnType);
         } else if (stmt instanceof WhileStmt) {
             return isWellTypedWhile((WhileStmt) stmt, typeEnvironment, classWeAreIn, functionReturnType);
@@ -638,6 +651,7 @@ return typeEnvironment;
                 null,
                 null);
     }
+
     public static void typecheck(final Program program) throws TypeErrorException {
         new Typechecker(program).isWellTypedProgram();
     }
