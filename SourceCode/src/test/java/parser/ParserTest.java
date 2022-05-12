@@ -489,7 +489,7 @@ public class ParserTest {
                 final Parser parser = new Parser(Arrays.asList(
                                 new ClassToken(), new ClassNameToken("test"), new ExtendsToken(),
                                 new ClassNameToken("bob"),
-                                new LeftCurlyToken(), new InstanceDecToken(instanceDec), new ClassNameToken("test"),
+                                new LeftCurlyToken(), new InstanceDecToken(instanceDec), new SemicolonToken(), new ClassNameToken("test"),
                                 new LeftParenToken(), varDec,
                                 new RightParenToken(), new ReturnToken(), methodDefToken,
                                 new RightCurlyToken())
