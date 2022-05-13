@@ -27,27 +27,29 @@ public class TypecheckerTest {
         final ClassNameToken className = new ClassNameToken("foo");
         final ClassNameToken extendsClassName = new ClassNameToken("Object");
         typeEnvironment.put(new Variable("x"), new ClassNameType(className));
-        typeEnvironment.put(new Variable("x"), new ClassNameType(className));
+        // typeEnvironment.put(new Variable("x"), new ClassNameType(className));
         List<VarDec> instanceVariables = new ArrayList<VarDec>();
         instanceVariables.add(new VarDec(new ClassNameType(className), new Variable("x")));
-        instanceVariables.add(new VarDec(new ClassNameType(className), new Variable("x")));
+        // instanceVariables.add(new VarDec(new ClassNameType(className), new
+        // Variable("x")));
         List<VarDec> constructorArguments = new ArrayList<VarDec>();
         constructorArguments.add(new VarDec(new ClassNameType(className), new Variable("x")));
-        constructorArguments.add(new VarDec(new ClassNameType(className), new Variable("x")));
+        // constructorArguments.add(new VarDec(new ClassNameType(className), new
+        // Variable("x")));
         List<Stmt> superBody = new ArrayList<Stmt>();
         superBody.add(new ReturnVoidStmt());
         List<MethodDef> methods = new ArrayList<MethodDef>();
         List<VarDec> arguments = new ArrayList<VarDec>();
         arguments.add(new VarDec(new ClassNameType(className), new Variable("x")));
-        arguments.add(new VarDec(new ClassNameType(className), new Variable("x")));
-        MethodDef newMethod = new MethodDef(new IntType(), new MethodName("x"), arguments, new PrintlnStmt(new VariableExp(new Variable("x"))));
+        // arguments.add(new VarDec(new ClassNameType(className), new Variable("x")));
+        MethodDef newMethod = new MethodDef(new IntType(), new MethodName("x"), arguments,
+                new PrintlnStmt(new VariableExp(new Variable("x"))));
         methods.add(newMethod);
-  
+
         final ClassDef classDef = new ClassDef(className, extendsClassName, instanceVariables, constructorArguments,
                 superBody, methods);
         typecheck.add(classDef);
-        
-        
+
         return new Typechecker(new Program(typecheck,
                 new ExpStmt(new IntLiteralExp(0))));
     }
@@ -151,18 +153,17 @@ public class TypecheckerTest {
         assertEquals(expectedType, receivedType);
     }
 
-
     @Test
     public void typeOfOpGreaterOpElseCaseTest() throws TypeErrorException {
         final Type expectedType = new IntType();
-        final OpExp op = new OpExp(new NewExp(new ClassNameToken("f"),Arrays.asList(new IntLiteralExp(1))), new GreaterThanOp(), new IntLiteralExp(2));
+        final OpExp op = new OpExp(new NewExp(new ClassNameToken("f"), Arrays.asList(new IntLiteralExp(1))),
+                new GreaterThanOp(), new IntLiteralExp(2));
         final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
         typeEnvironment.put(new Variable("x"), new IntType());
         final ClassNameToken classes = new ClassNameToken("foo");
         final Type receivedType = emptyTypechecker().typeofOp(op, typeEnvironment, classes);
         assertEquals(expectedType, receivedType);
     }
-
 
     @Test
     public void typeOfOpLessThanTest() throws TypeErrorException {
@@ -185,6 +186,7 @@ public class TypecheckerTest {
         final Type receivedType = emptyTypechecker().typeofOp(op, typeEnvironment, classes);
         assertEquals(expectedType, receivedType);
     }
+
     @Test
     public void typeOfOpGreaterThanElseCaseTest() throws TypeErrorException {
         final Type expectedType = new IntType();
@@ -228,6 +230,7 @@ public class TypecheckerTest {
         final Type receivedType = emptyTypechecker().typeofOp(op, typeEnvironment, classes);
         assertEquals(expectedType, receivedType);
     }
+
     @Test
     public void typeOfOpEqualsOpEdgeCaseTest() throws TypeErrorException {
         final Type expectedType = new IntType();
@@ -238,7 +241,6 @@ public class TypecheckerTest {
         final Type receivedType = emptyTypechecker().typeofOp(op, typeEnvironment, classes);
         assertEquals(expectedType, receivedType);
     }
-
 
     @Test
     public void typeOfOpEqualsOpElseCaseTest() throws TypeErrorException {
@@ -277,12 +279,14 @@ public class TypecheckerTest {
     }
 
     @Test
-    public void typeOfMethodCallExp() throws TypeErrorException {   // doesnt test methodcallexp, might need to implement type and refactor parser
+    public void typeOfMethodCallExp() throws TypeErrorException { // doesnt test methodcallexp, might need to implement
+                                                                  // type and refactor parser
         final ClassNameToken class_name = new ClassNameToken("foo");
         final Exp class_exp = new ClassNameExp(class_name);
         final Type expectedType = new ClassNameType(class_name);
-        final MethodCallExp method_call = new MethodCallExp(new VariableExp(new Variable("f")) , new MethodName("x"), Arrays.asList(
-            new VariableExp(new Variable("f"))));
+        final MethodCallExp method_call = new MethodCallExp(new VariableExp(new Variable("f")), new MethodName("x"),
+                Arrays.asList(
+                        new VariableExp(new Variable("f"))));
         final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
         typeEnvironment.put(new Variable("f"), new ClassNameType(class_name));
         final ClassNameToken classes = new ClassNameToken("foo");
@@ -291,54 +295,68 @@ public class TypecheckerTest {
     }
 
     @Test
-    public void typeOfMethodCallEdgeCaseExp() throws TypeErrorException {   // doesnt test methodcallexp, might need to implement type and refactor parser
+    public void typeOfMethodCallEdgeCaseExp() throws TypeErrorException { // doesnt test methodcallexp, might need to
+                                                                          // implement type and refactor parser
         final ClassNameToken class_name = null;
         final Exp class_exp = new ClassNameExp(class_name);
         final Type expectedType = new ClassNameType(class_name);
-        final MethodCallExp method_call = new MethodCallExp(new VariableExp(new Variable("f")) , new MethodName("x"), Arrays.asList(
-            new VariableExp(new Variable("f"))));
+        final MethodCallExp method_call = new MethodCallExp(new VariableExp(new Variable("f")), new MethodName("x"),
+                Arrays.asList(
+                        new VariableExp(new Variable("f"))));
         final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
         typeEnvironment.put(new Variable("f"), new ClassNameType(class_name));
         final ClassNameToken classes = new ClassNameToken("foo");
         final Type receivedType = initTypechecker().typeof(method_call, typeEnvironment, classes);
         assertEquals(expectedType, receivedType);
     }
-/*     @Test
-    public void testMethodsForClass() throws TypeErrorException {   // doesnt test methodcallexp, might need to implement type and refactor parser
-        final Map <MethodName, MethodDef> expectedType = new HashMap <MethodName, MethodDef>();
-        final List<VarDec> vardecs =  Arrays.asList(new VarDec(new IntType(), new Variable("x")));
-        expectedType.put(new MethodName("x"), new MethodDef(new VoidType(), new MethodName("x"), vardecs , new ReturnVoidStmt()));
-        final ClassNameToken className = new ClassNameToken("foo");
-        final ClassNameToken extendsClassName = new ClassNameToken("foo");
-        List<VarDec> instanceVariables = new ArrayList<VarDec>();
-        instanceVariables.add(new VarDec(new IntType(), new Variable("x")));
-        List<VarDec> constructorArguments = new ArrayList<VarDec>();
-        constructorArguments.add(new VarDec(new IntType(), new Variable("x")));
-        List<Stmt> superBody = new ArrayList<Stmt>();
-        superBody.add(new ReturnVoidStmt());
-        List<MethodDef> methods = new ArrayList<MethodDef>();
-        List<VarDec> arguments = new ArrayList<VarDec>();
-        arguments.add(new VarDec(new IntType(), new Variable("x")));
-        MethodDef newMethod = new MethodDef(new IntType(), new MethodName("x"), arguments, new ReturnVoidStmt());
-        methods.add(newMethod);
-
-        final ClassDef classDef = new ClassDef(className, extendsClassName, instanceVariables, constructorArguments,
-                superBody, methods);
-        final Map<ClassNameToken, ClassDef> classes = new HashMap<ClassNameToken, ClassDef>();
-        classes.put(className, classDef);
-        final Map<MethodName, MethodDef> typeEnvironment = new HashMap<MethodName, MethodDef>();
-        typeEnvironment.put(new MethodName("x"), new MethodDef(new VoidType(), new MethodName("x"), vardecs , new ReturnVoidStmt()));
-        final Map<MethodName, MethodDef> receivedType = initTypechecker().methodsForClass(className, classes);
-        assertEquals(expectedType, receivedType);
-    } */
+    /*
+     * @Test
+     * public void testMethodsForClass() throws TypeErrorException { // doesnt test
+     * methodcallexp, might need to implement type and refactor parser
+     * final Map <MethodName, MethodDef> expectedType = new HashMap <MethodName,
+     * MethodDef>();
+     * final List<VarDec> vardecs = Arrays.asList(new VarDec(new IntType(), new
+     * Variable("x")));
+     * expectedType.put(new MethodName("x"), new MethodDef(new VoidType(), new
+     * MethodName("x"), vardecs , new ReturnVoidStmt()));
+     * final ClassNameToken className = new ClassNameToken("foo");
+     * final ClassNameToken extendsClassName = new ClassNameToken("foo");
+     * List<VarDec> instanceVariables = new ArrayList<VarDec>();
+     * instanceVariables.add(new VarDec(new IntType(), new Variable("x")));
+     * List<VarDec> constructorArguments = new ArrayList<VarDec>();
+     * constructorArguments.add(new VarDec(new IntType(), new Variable("x")));
+     * List<Stmt> superBody = new ArrayList<Stmt>();
+     * superBody.add(new ReturnVoidStmt());
+     * List<MethodDef> methods = new ArrayList<MethodDef>();
+     * List<VarDec> arguments = new ArrayList<VarDec>();
+     * arguments.add(new VarDec(new IntType(), new Variable("x")));
+     * MethodDef newMethod = new MethodDef(new IntType(), new MethodName("x"),
+     * arguments, new ReturnVoidStmt());
+     * methods.add(newMethod);
+     * 
+     * final ClassDef classDef = new ClassDef(className, extendsClassName,
+     * instanceVariables, constructorArguments,
+     * superBody, methods);
+     * final Map<ClassNameToken, ClassDef> classes = new HashMap<ClassNameToken,
+     * ClassDef>();
+     * classes.put(className, classDef);
+     * final Map<MethodName, MethodDef> typeEnvironment = new HashMap<MethodName,
+     * MethodDef>();
+     * typeEnvironment.put(new MethodName("x"), new MethodDef(new VoidType(), new
+     * MethodName("x"), vardecs , new ReturnVoidStmt()));
+     * final Map<MethodName, MethodDef> receivedType =
+     * initTypechecker().methodsForClass(className, classes);
+     * assertEquals(expectedType, receivedType);
+     * }
+     */
 
     @Test
     public void typeOfNew() throws TypeErrorException {
         final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
         typeEnvironment.put(new Variable("x"), new ClassNameType(new ClassNameToken("foo")));
         assertEquals(new ClassNameType(new ClassNameToken("foo")),
-                initTypechecker().typeofNew(new NewExp(new ClassNameToken("foo"),  Arrays.asList(
-                    new VariableExp(new Variable("x")))), typeEnvironment, new ClassNameToken("foo")));
+                initTypechecker().typeofNew(new NewExp(new ClassNameToken("foo"), Arrays.asList(
+                        new VariableExp(new Variable("x")))), typeEnvironment, new ClassNameToken("foo")));
     }
 
     @Test
@@ -346,8 +364,18 @@ public class TypecheckerTest {
         final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
         typeEnvironment.put(new Variable("x"), new ClassNameType(new ClassNameToken("foo")));
         assertEquals(new ClassNameType(new ClassNameToken("foo")),
-                initTypechecker().typeof(new NewExp(new ClassNameToken("foo"),  Arrays.asList(
-                    new VariableExp(new Variable("x")))), typeEnvironment, new ClassNameToken("foo")));
+                initTypechecker().typeof(new NewExp(new ClassNameToken("foo"), Arrays.asList(
+                        new VariableExp(new Variable("x")))), typeEnvironment, new ClassNameToken("foo")));
+    }
+
+    @Test
+    public void typeOfArrayExpTest() throws TypeErrorException {
+        final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
+        typeEnvironment.put(new Variable("f"), new IntType());
+
+        ArrayExp arrExp = new ArrayExp(new VariableExp(new Variable("f")), new IntLiteralExp(1));
+        assertEquals(new ClassNameType(new ClassNameToken("foo")),
+                initTypechecker().typeof(arrExp, typeEnvironment, new ClassNameToken("foo")));
     }
 
     @Test
@@ -386,7 +414,6 @@ public class TypecheckerTest {
         assertEquals(expectedType, receivedType);
     }
 
-
     @Test
     public void WellTypedBlockStmtTest() throws TypeErrorException {
         final Map<Variable, Type> expectedType = new HashMap<Variable, Type>();
@@ -417,6 +444,7 @@ public class TypecheckerTest {
                 classes, type2);
         assertEquals(expectedType, receivedType);
     }
+
     @Test
     public void WellTypedReturnNonVoidTestEdgeCase() throws TypeErrorException {
         final Map<Variable, Type> expectedType = new HashMap<Variable, Type>();
@@ -446,6 +474,22 @@ public class TypecheckerTest {
                 classes, type2);
         assertEquals(expectedType, receivedType);
     }
+
+    @Test
+    public void WellTypedBreakTest() throws TypeErrorException {
+        final Map<Variable, Type> expectedType = new HashMap<Variable, Type>();
+        expectedType.put(new Variable("x"), new IntType());
+
+        final BreakStmt breakStmt = new BreakStmt();
+        final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
+        typeEnvironment.put(new Variable("x"), new IntType());
+        final ClassNameToken classes = new ClassNameToken("foo");
+        final Type type2 = new BreakType();
+        final Map<Variable, Type> receivedType = emptyTypechecker().isWellTypedStmt(breakStmt, typeEnvironment,
+                classes, type2);
+        assertEquals(expectedType, receivedType);
+    }
+
     @Test
     public void WellTypedReturnVoidTestEdgeCase() throws TypeErrorException {
         final Map<Variable, Type> expectedType = new HashMap<Variable, Type>();
@@ -460,6 +504,7 @@ public class TypecheckerTest {
                 classes, type2);
         assertEquals(expectedType, receivedType);
     }
+
     @Test
     public void WellTypedReturnVoidTestEdgeCase2() throws TypeErrorException {
         final Map<Variable, Type> expectedType = new HashMap<Variable, Type>();
@@ -502,6 +547,22 @@ public class TypecheckerTest {
         final ClassNameToken classes = new ClassNameToken("foo");
         final Type type2 = new VoidType();
         final Map<Variable, Type> receivedType = emptyTypechecker().isWellTypedStmt(assignmentStmt,
+                typeEnvironment, classes, type2);
+        assertEquals(expectedType, receivedType);
+    }
+
+    @Test
+    public void WellTypedArrayAssignmentTest() throws TypeErrorException {
+        final Map<Variable, Type> expectedType = new HashMap<Variable, Type>();
+        expectedType.put(new Variable("x"), new IntType());
+
+        final ArrayAssignment arrayStmt = new ArrayAssignment(new VariableExp(new Variable("x")), new IntLiteralExp(1),
+                new IntLiteralExp(1));
+        final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
+        typeEnvironment.put(new Variable("x"), new IntType());
+        final ClassNameToken classes = new ClassNameToken("foo");
+        final Type type2 = new VoidType();
+        final Map<Variable, Type> receivedType = emptyTypechecker().isWellTypedStmt(arrayStmt,
                 typeEnvironment, classes, type2);
         assertEquals(expectedType, receivedType);
     }
@@ -569,23 +630,28 @@ public class TypecheckerTest {
     @Test
     public void baseTypeEnvironmentForClass() throws TypeErrorException {
         final Map<Variable, Type> expectedType = new HashMap<Variable, Type>();
-        //expectedType.put(new Variable("x"), new IntType());
+        // expectedType.put(new Variable("x"), new IntType());
 
         final Map<Variable, Type> receivedType = emptyTypechecker()
                 .baseTypeEnvironmentForClass(new ClassNameToken("Object"));
         assertEquals(expectedType, receivedType);
     }
 
-   /*  @Test
-    public void WellTypedMethodsForClassTest() throws TypeErrorException {
-        final Map<MethodName, MethodDef> expectedType = new HashMap<MethodName, MethodDef>();
-        // expectedType.put(new Variable("x"), new IntType());
-
-        final Map<ClassNameToken, ClassDef> classes = new HashMap<ClassNameToken, ClassDef>();
-        //final Map<MethodName, MethodDef> receivedType = emptyTypechecker().methodsForClass(new ClassNameToken("f"),
-                //classes);
-        //assertEquals(expectedType, receivedType);
-    } */
+    /*
+     * @Test
+     * public void WellTypedMethodsForClassTest() throws TypeErrorException {
+     * final Map<MethodName, MethodDef> expectedType = new HashMap<MethodName,
+     * MethodDef>();
+     * // expectedType.put(new Variable("x"), new IntType());
+     * 
+     * final Map<ClassNameToken, ClassDef> classes = new HashMap<ClassNameToken,
+     * ClassDef>();
+     * //final Map<MethodName, MethodDef> receivedType =
+     * emptyTypechecker().methodsForClass(new ClassNameToken("f"),
+     * //classes);
+     * //assertEquals(expectedType, receivedType);
+     * }
+     */
 
     @Test
     public void WellTypedClassDefTest() throws TypeErrorException {
@@ -596,31 +662,32 @@ public class TypecheckerTest {
         final AssignmentStmt assignmentStmt = new AssignmentStmt(new Variable("x"), new IntLiteralExp(1));
         final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
         typeEnvironment.put(new Variable("x"), new IntType());
-        typeEnvironment.put(new Variable("x"), new IntType());
+        // typeEnvironment.put(new Variable("x"), new IntType());
         final ClassNameToken className = new ClassNameToken("foo");
         final ClassNameToken extendsClassName = new ClassNameToken("foo");
         List<VarDec> instanceVariables = new ArrayList<VarDec>();
         instanceVariables.add(new VarDec(new IntType(), new Variable("x")));
-        
-        instanceVariables.add(new VarDec(new IntType(), new Variable("x")));
+
+        // instanceVariables.add(new VarDec(new IntType(), new Variable("x")));
         List<VarDec> constructorArguments = new ArrayList<VarDec>();
         constructorArguments.add(new VarDec(new IntType(), new Variable("x")));
-        constructorArguments.add(new VarDec(new IntType(), new Variable("x")));
+        // constructorArguments.add(new VarDec(new IntType(), new Variable("x")));
         List<Stmt> superBody = new ArrayList<Stmt>();
         superBody.add(new ReturnVoidStmt());
         List<MethodDef> methods = new ArrayList<MethodDef>();
         List<VarDec> arguments = new ArrayList<VarDec>();
         arguments.add(new VarDec(new IntType(), new Variable("x")));
-        arguments.add(new VarDec(new IntType(), new Variable("x")));
-        arguments.add(new VarDec(new IntType(), new Variable("x")));
-        MethodDef newMethod = new MethodDef(new IntType(), new MethodName("x"), arguments, new PrintlnStmt(new VariableExp(new Variable("x"))));
+        // arguments.add(new VarDec(new IntType(), new Variable("x")));
+        // arguments.add(new VarDec(new IntType(), new Variable("x")));
+        MethodDef newMethod = new MethodDef(new IntType(), new MethodName("x"), arguments,
+                new PrintlnStmt(new VariableExp(new Variable("x"))));
         methods.add(newMethod);
 
         final ClassDef classDef = new ClassDef(className, extendsClassName, instanceVariables, constructorArguments,
                 superBody, methods);
         initTypechecker().isWellTypedClassDef(classDef);
-        //final Type receivedType = emptyTypechecker().isWellTypedClassDef(classDef);
-        //assertEquals(expectedType, receivedType);
+        // final Type receivedType = emptyTypechecker().isWellTypedClassDef(classDef);
+        // assertEquals(expectedType, receivedType);
     }
 
     @Test
@@ -652,11 +719,6 @@ public class TypecheckerTest {
         emptyTypechecker().typeofThis(null);
     }
 
-    @Test(expected = TypeErrorException.class)
-    public void testLengthNotInClass() throws TypeErrorException {
-        emptyTypechecker().typeofLength(null);
-    }
-
     @Test
     public void WellTypedProgram() throws TypeErrorException {
         // TODO: needs to be fixed not working properly...
@@ -677,15 +739,16 @@ public class TypecheckerTest {
         List<MethodDef> methods = new ArrayList<MethodDef>();
         List<VarDec> arguments = new ArrayList<VarDec>();
         arguments.add(new VarDec(new IntType(), new Variable("x")));
-        MethodDef newMethod = new MethodDef(new IntType(), new MethodName("x"), arguments, new PrintlnStmt(new VariableExp(new Variable("x"))));
+        MethodDef newMethod = new MethodDef(new IntType(), new MethodName("x"), arguments,
+                new PrintlnStmt(new VariableExp(new Variable("x"))));
         methods.add(newMethod);
 
         final ClassDef classDef = new ClassDef(className, extendsClassName, instanceVariables, constructorArguments,
                 superBody, methods);
         initTypechecker().isWellTypedClassDef(classDef);
         initTypechecker().isWellTypedProgram();
-        
-        //final Type receivedType = emptyTypechecker().isWellTypedClassDef(classDef);
-        //assertEquals(expectedType, receivedType);
+
+        // final Type receivedType = emptyTypechecker().isWellTypedClassDef(classDef);
+        // assertEquals(expectedType, receivedType);
     }
 }

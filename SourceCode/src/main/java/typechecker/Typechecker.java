@@ -169,14 +169,6 @@ public class Typechecker {
         }
     }
 
-    public Type typeofLength(final ClassNameToken classWeAreIn) throws TypeErrorException { 
-        if (classWeAreIn == null) {
-            throw new TypeErrorException("this used in the entry point");
-        } else {
-            return new ClassNameType(classWeAreIn); 
-        }
-    }
-
     public Type typeofOp(final OpExp exp,
             final Map<Variable, Type> typeEnvironment,
             final ClassNameToken classWeAreIn) throws TypeErrorException {
@@ -403,13 +395,15 @@ public class Typechecker {
         else if (exp instanceof ThisExp) {
             return typeofThis(classWeAreIn);// done
         } else if (exp instanceof LengthExp) {
-            return typeofLength(classWeAreIn);// done
+            return new IntType();// done
         } else if (exp instanceof OpExp) {
             return typeofOp((OpExp) exp, typeEnvironment, classWeAreIn);// done
         } else if (exp instanceof MethodCallExp) {
             return typeofMethodCall((MethodCallExp) exp, typeEnvironment, classWeAreIn);
         } else if (exp instanceof NewExp) {
             return typeofNew((NewExp) exp, typeEnvironment, classWeAreIn); // done
+        } else if (exp instanceof ArrayExp) {
+            return new IntType();// done
         } else {
             // add lenExp
             throw new TypeErrorException("Unrecognized expression: " + exp);
@@ -440,6 +434,15 @@ public class Typechecker {
             final ClassNameToken classWeAreIn) throws TypeErrorException {
         final Type expType = typeof(stmt.exp, typeEnvironment, classWeAreIn);
         final Type variableType = getVariable(typeEnvironment, stmt.var);
+        assertEqualOrSubtypeOf(expType, variableType);
+        return typeEnvironment;
+    }
+
+    public Map<Variable, Type> isWellTypedArrayAssignment(final ArrayAssignment stmt,
+            final Map<Variable, Type> typeEnvironment,
+            final ClassNameToken classWeAreIn) throws TypeErrorException {
+        final Type expType = typeof(stmt.assignThis, typeEnvironment, classWeAreIn);
+        final Type variableType = getVariable(typeEnvironment, stmt.variable.variable);
         assertEqualOrSubtypeOf(expType, variableType);
         return typeEnvironment;
     }
@@ -510,6 +513,18 @@ public class Typechecker {
         }
     }
 
+    public Map<Variable, Type> isWellTypedBreakStmt(final Map<Variable, Type> typeEnvironment,
+            final ClassNameToken classWeAreIn,
+            final Type functionReturnType) throws TypeErrorException {
+        if (functionReturnType == null) {
+            throw new TypeErrorException("return in program entry point");
+        } else if (!functionReturnType.equals(new BreakType())) {
+            throw new TypeErrorException("return of break in non-break context");
+        } else {
+            return typeEnvironment;
+        }
+    }
+
     // bool x = true;
     // while (true) {
     // int x = 17;
@@ -528,6 +543,8 @@ public class Typechecker {
             return isWellTypedVar((VariableInitializationStmt) stmt, typeEnvironment, classWeAreIn);
         } else if (stmt instanceof AssignmentStmt) {
             return isWellTypedAssign((AssignmentStmt) stmt, typeEnvironment, classWeAreIn);
+        } else if (stmt instanceof ArrayAssignment) {
+            return isWellTypedArrayAssignment((ArrayAssignment) stmt, typeEnvironment, classWeAreIn);
         } else if (stmt instanceof IfStmt) {
             return isWellTypedIf((IfStmt) stmt, typeEnvironment, classWeAreIn, functionReturnType);
         } else if (stmt instanceof WhileStmt) {
@@ -537,6 +554,8 @@ public class Typechecker {
                     functionReturnType);
         } else if (stmt instanceof ReturnVoidStmt) {
             return isWellTypedReturnVoid(typeEnvironment, classWeAreIn, functionReturnType);
+        } else if (stmt instanceof BreakStmt) {
+            return isWellTypedBreakStmt(typeEnvironment, classWeAreIn, functionReturnType);
         } else if (stmt instanceof PrintlnStmt) {
             typeof(((PrintlnStmt) stmt).exp, typeEnvironment, classWeAreIn);
             return typeEnvironment;
