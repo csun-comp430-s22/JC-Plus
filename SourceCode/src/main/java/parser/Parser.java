@@ -428,7 +428,8 @@ public class Parser {
         } else if (token instanceof Variable) {
 
             //ParseResult<Variable> var = parseVariableExp(position);
-            if (getToken(position+1).toString() != " ") { // var = exp;
+            if (getToken(position+1).toString() != "LeftBracketToken") { // var = exp;
+               
                 assertTokenHereIs(position + 1, new AssignmentToken()); // +2 because we are skipping whitespace
                 final ParseResult<Exp> exp = parseExp(position + 2);
                 assertTokenHereIs(exp.position, new SemicolonToken());
@@ -438,11 +439,11 @@ public class Parser {
                 // statement that will have ,, we can
                 // use nested conditionals
                 // leftBracketToken after position 1
-                assertTokenHereIs(position + 3, new parser.LeftBracketToken());
-                final ParseResult<Exp> exp = parseExp(position + 3);
+                assertTokenHereIs(position + 1, new parser.LeftBracketToken());
+                final ParseResult<Exp> exp = parseExp(position + 2);
                 assertTokenHereIs(exp.position, new parser.RightBracketToken());
-                assertTokenHereIs(exp.position + 2, new AssignmentToken());
-                final ParseResult<Exp> exp2 = parseExp(position + 5);
+                assertTokenHereIs(exp.position + 1, new AssignmentToken());
+                final ParseResult<Exp> exp2 = parseExp(exp.position+2);
                 assertTokenHereIs(exp2.position, new SemicolonToken());
                 VariableExp v = new VariableExp(new Variable(token.toString()));
                 ArrayAssignment ar = new ArrayAssignment(v, exp.result, exp2.result);

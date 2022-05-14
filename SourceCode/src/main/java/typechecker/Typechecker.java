@@ -3,6 +3,9 @@ package typechecker;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.lang.model.type.ArrayType;
+
 import java.util.HashSet;
 
 import parser.*;
@@ -381,6 +384,8 @@ public class Typechecker {
         return new ClassNameType(exp.className);
     }
 
+   
+
     // classWeAreIn is null if we are in the entry point
     public Type typeof(final Exp exp,
             final Map<Variable, Type> typeEnvironment,
@@ -402,7 +407,7 @@ public class Typechecker {
             return typeofMethodCall((MethodCallExp) exp, typeEnvironment, classWeAreIn);
         } else if (exp instanceof NewExp) {
             return typeofNew((NewExp) exp, typeEnvironment, classWeAreIn); // done
-        } else if (exp instanceof ArrayExp) {
+        }  else if (exp instanceof ArrayExp) {
             return new IntType();// done
         } else {
             // add lenExp
