@@ -1,6 +1,6 @@
 package parser;
 
-public class NewArrayDeclarationExp implements Exp {
+public class NewArrayDeclarationExp implements Exp { //new type[exp] //new Int[exp]
     public final Type type;
     public final Exp exp;
 

@@ -1,15 +1,16 @@
 package parser;
 
-public class BreakType implements Type {
+public class ArrayType implements Type {
     public int hashCode() {
-        return 14;
+        return 0;
     }
 
     public boolean equals(final Object other) {
-        return other instanceof BreakType;
+        return other instanceof ArrayType;
     }
 
     public String toString() {
-        return "BreakType";
+        return "ArrayType";
     }
+
 }

@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.lang.model.type.ArrayType;
-
 import java.util.HashSet;
 
 import parser.*;
@@ -155,9 +153,24 @@ public class Typechecker {
         }
     }
 
+    public static Type getArray(final Map<Variable, Type> typeEnvironment,
+            final Variable variable) throws TypeErrorException {
+        final Type retval = typeEnvironment.get(variable);
+        if (retval == null) {
+            throw new TypeErrorException("Array not in scope: " + variable.name);
+        } else {
+            return retval;
+        }
+    }
+
     public Type typeofVariable(final VariableExp exp,
             final Map<Variable, Type> typeEnvironment) throws TypeErrorException {
         return getVariable(typeEnvironment, exp.variable);
+    }
+
+    public Type typeofArrayVariable(final ArrayExp array,
+            final Map<Variable, Type> typeEnvironment) throws TypeErrorException {
+        return getArray(typeEnvironment, array.variable.variable);
     }
 
     public Type typeofThis(final ClassNameToken classWeAreIn) throws TypeErrorException { // Osher: in Deweys file, he
@@ -384,7 +397,28 @@ public class Typechecker {
         return new ClassNameType(exp.className);
     }
 
-   
+    public Type typeOfNewArray(final NewArrayDeclarationExp exp,
+            final Map<Variable, Type> typeEnvironment,
+            final ClassNameToken classWeAreIn) throws TypeErrorException {
+
+        final Type receivedType = typeof(exp.exp, typeEnvironment, classWeAreIn);
+       
+        assertEqualOrSubtypeOf(exp.type, new ArrayType());
+        assertEqualOrSubtypeOf(receivedType, new IntType());
+
+        return new ArrayType();
+    }
+
+    public Type typeOfArray(final ArrayExp exp,
+            final Map<Variable, Type> typeEnvironment,
+            final ClassNameToken classWeAreIn) throws TypeErrorException {
+
+        typeofArrayVariable(exp, typeEnvironment);
+        typeof(exp.index, typeEnvironment, classWeAreIn);
+
+        return new IntType();
+
+    }
 
     // classWeAreIn is null if we are in the entry point
     public Type typeof(final Exp exp,
@@ -407,8 +441,10 @@ public class Typechecker {
             return typeofMethodCall((MethodCallExp) exp, typeEnvironment, classWeAreIn);
         } else if (exp instanceof NewExp) {
             return typeofNew((NewExp) exp, typeEnvironment, classWeAreIn); // done
-        }  else if (exp instanceof ArrayExp) {
-            return new IntType();// done
+        } else if (exp instanceof NewArrayDeclarationExp) {
+            return typeOfNewArray((NewArrayDeclarationExp) exp, typeEnvironment, classWeAreIn); // done
+        } else if (exp instanceof ArrayExp) {
+            return typeOfArray((ArrayExp) exp, typeEnvironment, classWeAreIn);// done
         } else {
             // add lenExp
             throw new TypeErrorException("Unrecognized expression: " + exp);
@@ -447,8 +483,12 @@ public class Typechecker {
             final Map<Variable, Type> typeEnvironment,
             final ClassNameToken classWeAreIn) throws TypeErrorException {
         final Type expType = typeof(stmt.assignThis, typeEnvironment, classWeAreIn);
+        final Type index = typeof(stmt.index, typeEnvironment, classWeAreIn);
         final Type variableType = getVariable(typeEnvironment, stmt.variable.variable);
-        assertEqualOrSubtypeOf(expType, variableType);
+        assertEqualOrSubtypeOf(expType, new IntType());
+        assertEqualOrSubtypeOf(index, new IntType());
+        assertEqualOrSubtypeOf(variableType, new ArrayType());
+
         return typeEnvironment;
     }
 
@@ -519,15 +559,10 @@ public class Typechecker {
     }
 
     public Map<Variable, Type> isWellTypedBreakStmt(final Map<Variable, Type> typeEnvironment,
-            final ClassNameToken classWeAreIn,
-            final Type functionReturnType) throws TypeErrorException {
-        if (functionReturnType == null) {
-            throw new TypeErrorException("return in program entry point");
-        } else if (!functionReturnType.equals(new BreakType())) {
-            throw new TypeErrorException("return of break in non-break context");
-        } else {
-            return typeEnvironment;
-        }
+            final ClassNameToken classWeAreIn) throws TypeErrorException {
+
+        return typeEnvironment;
+
     }
 
     // bool x = true;
@@ -541,10 +576,7 @@ public class Typechecker {
             final Map<Variable, Type> typeEnvironment,
             final ClassNameToken classWeAreIn,
             final Type functionReturnType) throws TypeErrorException {
-        if (stmt instanceof ExpStmt) { // Osher: no idea what dewey is doing here
-            typeof(((ExpStmt) stmt).exp, typeEnvironment, classWeAreIn);
-            return typeEnvironment;
-        } else if (stmt instanceof VariableInitializationStmt) {
+        if (stmt instanceof VariableInitializationStmt) {
             return isWellTypedVar((VariableInitializationStmt) stmt, typeEnvironment, classWeAreIn);
         } else if (stmt instanceof AssignmentStmt) {
             return isWellTypedAssign((AssignmentStmt) stmt, typeEnvironment, classWeAreIn);
@@ -560,7 +592,7 @@ public class Typechecker {
         } else if (stmt instanceof ReturnVoidStmt) {
             return isWellTypedReturnVoid(typeEnvironment, classWeAreIn, functionReturnType);
         } else if (stmt instanceof BreakStmt) {
-            return isWellTypedBreakStmt(typeEnvironment, classWeAreIn, functionReturnType);
+            return isWellTypedBreakStmt(typeEnvironment, classWeAreIn);
         } else if (stmt instanceof PrintlnStmt) {
             typeof(((PrintlnStmt) stmt).exp, typeEnvironment, classWeAreIn);
             return typeEnvironment;
