@@ -23,7 +23,7 @@ methodname is the name of a method
 classname is a class name
 
 type::= Int | Void | Int[] |  // Built-in types
- 	      classname class type; // includes Object and String
+ 	      classname class; // includes Object and String
 
 op ::= + | - | * | /  // Arithmetic operations
        == | != | < | > // Comparison operations
