@@ -165,12 +165,7 @@ public class Parser {
                         curPosition + 2);
 
             }
-        } else if (token instanceof ExtendsToken) { // new type[exp]
-
-            assertTokenHereIs(position, new ExtendsToken());
-
-            return new ParseResult<Exp>(new ExtendsExp(), position + 1);
-        } else if (token instanceof Variable) { // exp.methodname(exp*)
+        }  else if (token instanceof Variable) { // exp.methodname(exp*)
             final ParseResult<Exp> exp = parseExp(position);
             assertTokenHereIs(exp.position, new DotToken());
             final ParseResult<MethodNameType> methodName = parseMethodName(exp.position + 1);
@@ -329,8 +324,17 @@ public class Parser {
         if (token instanceof VoidToken) {
             return new ParseResult<Type>(new VoidType(), position + 1);
         } else if (token instanceof IntToken) {
+            if(getToken(position + 1).toString() == "LeftBracketToken" ){
+                final ParseResult<Exp> exp = parseExp(position + 2);
+                assertTokenHereIs(exp.position, new parser.RightBracketToken());
+                return new ParseResult<Type>(new ArrayType(), exp.position + 1);
+            }else{
             return new ParseResult<Type>(new IntType(), position + 1);
-        } else {
+            }
+        } else if (token instanceof ClassNameToken){
+            assertTokenHereIs(position+1, new ClassToken());
+            return new ParseResult<Type>(new ClassNameType(new ClassNameToken(getToken(position).toString())), position + 2);
+        }else{
             throw new ParseException("expected Int or Void; received: " + token);
         }
     } // parseType
