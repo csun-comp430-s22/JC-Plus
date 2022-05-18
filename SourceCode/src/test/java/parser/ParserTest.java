@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import lexer.SemiColonToken;
+import parser.SemiColonToken;
 import lexer.VariableToken;
 
 public class ParserTest {
@@ -95,6 +95,19 @@ public class ParserTest {
                                                 0),
                                 parser.parseVardec(0));
         }
+        
+
+        @Test
+        public void testInstanceDecInt() throws ParseException {
+                // type var
+                final Parser parser = new Parser(Arrays.asList(new IntToken(), new Variable("x")));
+                assertEquals(
+                                new ParseResult<VarDec>(
+                                                new VarDec(new IntType(), new Variable("x")),
+                                                0),
+                                parser.parseInstanceDec(0));
+        }
+
 
         @Test
         public void testVarDecVoid() throws ParseException {
@@ -197,7 +210,7 @@ public class ParserTest {
         public void testSecondaryLength() throws ParseException {
                 final Parser parser = new Parser(
                                 Arrays.asList(new LengthToken(), new LeftParenToken(), new Variable("f"),
-                                                new RightParenToken(), new SemicolonToken()));
+                                                new RightParenToken(), new parser.SemiColonToken()));
                 assertEquals(new ParseResult<Exp>(new LengthExp(), 1),
                                 parser.parseSecondaryExp(0));
         }
@@ -216,37 +229,49 @@ public class ParserTest {
 
         @Test
         public void testSecondaryNew() throws ParseException {
+                // New Int[1]
 
                 final Parser parser = new Parser(Arrays.asList(new NewToken(), new IntToken(), new LeftBracketToken(),
-                                new Variable("f"), new RightBracketToken()));
+                                new IntLiteralToken(1), new RightBracketToken()));
                 assertEquals(
                                 new ParseResult<Exp>(new NewArrayDeclarationExp(new TypeExp(new TypeToken("Int")),
                                                 new VariableExp(new Variable("f"))), 1),
                                 parser.parseSecondaryExp(0));
         }
 
-
-        
         @Test
-        public void testSecondaryExp() throws ParseException { //exp.methodname(vardec*)
-                //x.bob(0)
+        public void testSecondaryNewClass() throws ParseException {
+                // new classname(exp*)
+
+                final Parser parser = new Parser(
+                                Arrays.asList(new NewToken(), new ClassNameToken("f"), new LeftParenToken(),
+                                                new Variable("f"), new RightParenToken()));
+
+                List<Exp> params = new ArrayList<Exp>();
+                params.add(new VariableExp(new Variable("f")));
+                assertEquals(
+                                new ParseResult<Exp>(new NewExp(new ClassNameToken("f"), params), 1),
+                                parser.parseSecondaryExp(0));
+        }
+
+        @Test
+        public void testSecondaryExp() throws ParseException { // exp.methodname(vardec*)
+                // x.bob(0)
                 //
 
-                final Parser parser = new Parser(Arrays.asList(new Variable("x"), new DotToken(), 
-               new MethodName("bob"), new LeftParenToken(),
+                final Parser parser = new Parser(Arrays.asList(new Variable("x"), new DotToken(),
+                                new MethodName("bob"), new LeftParenToken(),
                                 new IntLiteralToken(0), new RightParenToken()));
-                
-                                List<Exp> params = new ArrayList<Exp>();
-                                params.add(new IntLiteralExp(0));
+
+                List<Exp> params = new ArrayList<Exp>();
+                params.add(new IntLiteralExp(0));
                 assertEquals(
                                 new ParseResult<Exp>(
-                                        new ExpMethodNameExp(
-                                                new VariableExp(new Variable("x")),
-                                                new MethodName("bob"),
-                                                params
-                                                
-                                      
-                                                
+                                                new ExpMethodNameExp(
+                                                                new VariableExp(new Variable("x")),
+                                                                new MethodName("bob"),
+                                                                params
+
                                                 ), 1),
                                 parser.parseSecondaryExp(0));
         }
@@ -296,7 +321,8 @@ public class ParserTest {
                 final Parser parser = new Parser(Arrays.asList(
                                 new IfToken(), new LeftParenToken(), new IntLiteralToken(0), new RightParenToken(),
                                 new ReturnToken(),
-                                new SemicolonToken(), new ElseToken(), new ReturnToken(), new SemicolonToken()));
+                                new parser.SemiColonToken(), new ElseToken(), new ReturnToken(),
+                                new parser.SemiColonToken()));
 
                 assertEquals(new ParseResult<Stmt>(new IfStmt(
                                 new IntLiteralExp(0), new ReturnVoidStmt(), new ReturnVoidStmt()), 1),
@@ -311,7 +337,7 @@ public class ParserTest {
                 final Parser parser = new Parser(Arrays.asList(
                                 new WhileToken(), new LeftParenToken(), new IntLiteralToken(0), new RightParenToken(),
                                 new BreakToken(),
-                                new SemicolonToken()));
+                                new parser.SemiColonToken()));
 
                 assertEquals(new ParseResult<Stmt>(new WhileStmt(
                                 new IntLiteralExp(0), new BreakStmt()), 1),
@@ -324,7 +350,8 @@ public class ParserTest {
                 // { stmt* }
                 // return 0;
                 final Parser parser = new Parser(Arrays.asList(
-                                new LeftCurlyToken(), new ReturnToken(), new IntLiteralToken(0), new SemicolonToken(),
+                                new LeftCurlyToken(), new ReturnToken(), new IntLiteralToken(0),
+                                new parser.SemiColonToken(),
                                 new RightCurlyToken()));
 
                 assertEquals(new ParseResult<Stmt>(new WhileStmt(
@@ -338,7 +365,7 @@ public class ParserTest {
                 // Println(exp);
                 final Parser parser = new Parser(Arrays.asList(
                                 new PrintlnToken(), new LeftParenToken(), new IntLiteralToken(0),
-                                new RightParenToken(), new SemicolonToken()));
+                                new RightParenToken(), new parser.SemiColonToken()));
 
                 assertEquals(new ParseResult<Stmt>(new PrintlnStmt(
                                 new IntLiteralExp(0)), 1),
@@ -353,7 +380,7 @@ public class ParserTest {
                                 new Variable("f"), new LeftBracketToken(), new IntLiteralToken(0),
                                 new RightBracketToken(),
                                 new AssignmentToken(), new IntLiteralToken(1),
-                                new SemicolonToken()));
+                                new parser.SemiColonToken()));
 
                 VariableExp v = new VariableExp(new Variable("f"));
                 ArrayAssignment a = new ArrayAssignment(v, new IntLiteralExp(0), new IntLiteralExp(1));
@@ -368,7 +395,7 @@ public class ParserTest {
                 final Parser parser = new Parser(Arrays.asList(
                                 new Variable("f"),
                                 new AssignmentToken(), new IntLiteralToken(1),
-                                new SemicolonToken()));
+                                new parser.SemiColonToken()));
 
                 AssignmentStmt a = new AssignmentStmt(new Variable("f"), new IntLiteralExp(1));
                 assertEquals(new ParseResult<Stmt>(a, 1),
@@ -382,7 +409,7 @@ public class ParserTest {
                 final Parser parser = new Parser(Arrays.asList(
                                 new ReturnToken(),
 
-                                new SemicolonToken()));
+                                new parser.SemiColonToken()));
 
                 ReturnVoidStmt a = new ReturnVoidStmt();
                 assertEquals(new ParseResult<Stmt>(a, 1),
@@ -396,14 +423,13 @@ public class ParserTest {
                 final Parser parser = new Parser(Arrays.asList(
                                 new ReturnToken(),
                                 new IntLiteralToken(0),
-                                new SemicolonToken()));
+                                new parser.SemiColonToken()));
 
                 ReturnNonVoidStmt a = new ReturnNonVoidStmt(new IntLiteralExp(0));
                 assertEquals(new ParseResult<Stmt>(a, 1),
                                 parser.parseStmt(0));
         }
 
-        
         @Test
         public void testMethodDefVoid() throws ParseException {
 
@@ -417,7 +443,7 @@ public class ParserTest {
                                 new VoidToken(), new MethodName("bob"), new LeftParenToken(),
                                 new IntToken(), new Variable("x"),
 
-                                new RightParenToken(), new ReturnToken(), new SemicolonToken())
+                                new RightParenToken(), new ReturnToken(), new parser.SemiColonToken())
 
                 );
 
@@ -428,7 +454,6 @@ public class ParserTest {
                 ), 1),
                                 parser.parseMethodDef(0));
         }
-
 
         @Test
         public void testMethodDefInt() throws ParseException {
@@ -443,7 +468,7 @@ public class ParserTest {
                                 new IntToken(), new MethodName("bob"), new LeftParenToken(),
                                 new IntToken(), new Variable("x"),
 
-                                new RightParenToken(), new ReturnToken(), new SemicolonToken())
+                                new RightParenToken(), new ReturnToken(), new parser.SemiColonToken())
 
                 );
 
@@ -464,7 +489,7 @@ public class ParserTest {
                 // methoddef }
 
                 InstanceDec instanceDec = new InstanceDec(new VarDec(
-                        new IntType(), new Variable("a")), new IntLiteralExp(0));
+                                new IntType(), new Variable("a")), new IntLiteralExp(0));
 
                 List<VarDec> vardecs = new ArrayList<VarDec>();
                 vardecs.add(new VarDec(new IntType(), new Variable("x")));
@@ -489,7 +514,8 @@ public class ParserTest {
                 final Parser parser = new Parser(Arrays.asList(
                                 new ClassToken(), new ClassNameToken("test"), new ExtendsToken(),
                                 new ClassNameToken("bob"),
-                                new LeftCurlyToken(), new InstanceDecToken(instanceDec), new SemicolonToken(), new ClassNameToken("test"),
+                                new LeftCurlyToken(), new InstanceDecToken(instanceDec),
+                                new ClassNameToken("test"),
                                 new LeftParenToken(), varDec,
                                 new RightParenToken(), new ReturnToken(), methodDefToken,
                                 new RightCurlyToken())
@@ -497,8 +523,8 @@ public class ParserTest {
                 );
 
                 assertEquals(new ParseResult<ClassDef>(new ClassDef(
-                        new ClassNameToken("bob"),
-                        new ClassNameToken("test"),
+                                new ClassNameToken("bob"),
+                                new ClassNameToken("test"),
                                 instanceVariables, vardecs, superBody, methods
 
                 ), 1),
@@ -514,7 +540,7 @@ public class ParserTest {
                 // methoddef* }
 
                 InstanceDec instanceDec = new InstanceDec(new VarDec(
-                        new IntType(), new Variable("a")), new IntLiteralExp(0));
+                                new IntType(), new Variable("a")), new IntLiteralExp(0));
 
                 List<VarDec> vardecs = new ArrayList<VarDec>();
                 vardecs.add(new VarDec(new IntType(), new Variable("x")));

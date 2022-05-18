@@ -402,7 +402,7 @@ public class Typechecker {
             final ClassNameToken classWeAreIn) throws TypeErrorException {
 
         final Type receivedType = typeof(exp.exp, typeEnvironment, classWeAreIn);
-       
+
         assertEqualOrSubtypeOf(exp.type, new ArrayType());
         assertEqualOrSubtypeOf(receivedType, new IntType());
 
@@ -416,7 +416,16 @@ public class Typechecker {
         typeofArrayVariable(exp, typeEnvironment);
         typeof(exp.index, typeEnvironment, classWeAreIn);
 
-        return new IntType();
+        return new ArrayType();
+
+    }
+
+    public Type typeofClassNameExp(final ClassNameExp exp,
+            final Map<Variable, Type> typeEnvironment,
+            final ClassNameToken classWeAreIn) throws TypeErrorException {
+
+        getClass(exp.className);
+        return new ClassNameType(exp.className);
 
     }
 
@@ -445,6 +454,8 @@ public class Typechecker {
             return typeOfNewArray((NewArrayDeclarationExp) exp, typeEnvironment, classWeAreIn); // done
         } else if (exp instanceof ArrayExp) {
             return typeOfArray((ArrayExp) exp, typeEnvironment, classWeAreIn);// done
+        } else if (exp instanceof ClassNameExp) {
+            return typeofClassNameExp((ClassNameExp) exp, typeEnvironment, classWeAreIn);// done
         } else {
             // add lenExp
             throw new TypeErrorException("Unrecognized expression: " + exp);
@@ -487,7 +498,7 @@ public class Typechecker {
         final Type variableType = getVariable(typeEnvironment, stmt.variable.variable);
         assertEqualOrSubtypeOf(expType, new IntType());
         assertEqualOrSubtypeOf(index, new IntType());
-        assertEqualOrSubtypeOf(variableType, new ArrayType());
+        assertEqualOrSubtypeOf(variableType, new IntType());
 
         return typeEnvironment;
     }
@@ -706,6 +717,10 @@ public class Typechecker {
                 new HashMap<Variable, Type>(),
                 null,
                 null);
+    }
+
+    public void CheckTypeCheck(final Program program) throws TypeErrorException {
+        typecheck(program);
     }
 
     public static void typecheck(final Program program) throws TypeErrorException {
