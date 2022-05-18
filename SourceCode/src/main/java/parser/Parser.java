@@ -139,7 +139,7 @@ public class Parser {
                 return new ParseResult<Exp>(new NewArrayDeclarationExp(type.result, exp.result),
                         exp.position + 2);
             } else { // new classname(exp*)
-                final ParseResult<ClassNameExp> type = parseClass(position + 1); // this should be the type right?,
+                final ParseResult<ClassNameToken> type = parseClass(position + 1); // this should be the type right?,
                 // no create parse type function, create based on proposal
                 assertTokenHereIs(type.position, new parser.LeftParenToken());
 
@@ -161,7 +161,7 @@ public class Parser {
                 } // exp*
 
                 assertTokenHereIs(curPosition, new parser.RightParenToken());
-                return new ParseResult<Exp>(new NewExp(type.result.className, expParams),
+                return new ParseResult<Exp>(new NewExp(type.result, expParams),
                         curPosition + 2);
 
             }
@@ -207,11 +207,11 @@ public class Parser {
     }
     // parsemethodName
 
-    public ParseResult<ClassNameExp> parseClass(final int position) throws ParseException {
+    public ParseResult<ClassNameToken> parseClass(final int position) throws ParseException {
         final Token token = getToken(position);
         if (token instanceof ClassNameToken) {
             final String name = ((ClassNameToken) token).name;
-            return new ParseResult<ClassNameExp>(new ClassNameExp(new ClassNameToken(name)), position + 1);
+            return new ParseResult<ClassNameToken>((new ClassNameToken(name)), position + 1);
         } else {
             throw new ParseException("expected className; received: " + token);
         }
@@ -573,11 +573,11 @@ public class Parser {
             // constructor(vardec*) stmt* // vardecs are comma-sep
             // methoddef* }
 
-            final ParseResult<ClassNameExp> className = parseClass(position + 1);
+            final ParseResult<ClassNameToken> className = parseClass(position + 1);
             final ClassNameToken aclassname = new ClassNameToken(className.result.toString());// Alexis (Maybe)
             // skip whitespace after class
             assertTokenHereIs(className.position, new ExtendsToken());
-            final ParseResult<ClassNameExp> extendsClassName = parseClass(className.position+1);
+            final ParseResult<ClassNameToken> extendsClassName = parseClass(className.position+1);
             final ClassNameToken eclassname = new ClassNameToken(extendsClassName.result.toString());// Alexis Also
                                                                                                      // maybe
             assertTokenHereIs(extendsClassName.position, new parser.LeftCurlyToken());
@@ -601,7 +601,7 @@ public class Parser {
 
             String a = getToken(curPosition + 1).toString();
             assertTokenHereIs(curPosition + 1, new ClassNameToken(a));
-            final ParseResult<ClassNameExp> constructorName = parseClass(curPosition + 1);
+            final ParseResult<ClassNameToken> constructorName = parseClass(curPosition + 1);
             assertTokenHereIs(constructorName.position, new LeftParenToken());
 
             // vardec*

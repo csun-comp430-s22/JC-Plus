@@ -420,14 +420,6 @@ public class Typechecker {
 
     }
 
-    public Type typeofClassNameExp(final ClassNameExp exp,
-            final Map<Variable, Type> typeEnvironment,
-            final ClassNameToken classWeAreIn) throws TypeErrorException {
-
-        getClass(exp.className);
-        return new ClassNameType(exp.className);
-
-    }
 
     // classWeAreIn is null if we are in the entry point
     public Type typeof(final Exp exp,
@@ -454,8 +446,6 @@ public class Typechecker {
             return typeOfNewArray((NewArrayDeclarationExp) exp, typeEnvironment, classWeAreIn); // done
         } else if (exp instanceof ArrayExp) {
             return typeOfArray((ArrayExp) exp, typeEnvironment, classWeAreIn);// done
-        } else if (exp instanceof ClassNameExp) {
-            return typeofClassNameExp((ClassNameExp) exp, typeEnvironment, classWeAreIn);// done
         } else {
             // add lenExp
             throw new TypeErrorException("Unrecognized expression: " + exp);

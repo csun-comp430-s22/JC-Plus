@@ -655,11 +655,27 @@ public class TypecheckerTest {
         expectedType.put(new Variable("x"), new ClassNameType(new ClassNameToken("foo")));
 
         final AssignmentStmt assignmentStmt = new AssignmentStmt(new Variable("x"),
-                new ClassNameExp(new ClassNameToken("foo")));
+                new NewExp(new ClassNameToken("foo"),  Arrays.asList(new IntLiteralExp(1)))); // var = exp
         final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
         typeEnvironment.put(new Variable("x"), new ClassNameType(new ClassNameToken("foo")));
         final ClassNameToken classes = new ClassNameToken("foo");
         final Type type2 = new ClassNameType(new ClassNameToken("foo"));
+        final Map<Variable, Type> receivedType = initTypechecker().isWellTypedStmt(assignmentStmt,
+                typeEnvironment, classes, type2);
+        assertEquals(expectedType, receivedType);
+    }
+
+    @Test
+    public void WellTypedAssignAssertEqualsOrSubtypeOfTestV2() throws TypeErrorException {
+        final Map<Variable, Type> expectedType = new HashMap<Variable, Type>();
+        expectedType.put(new Variable("x"), new ClassNameType(new ClassNameToken("foo")));
+
+        final AssignmentStmt assignmentStmt = new AssignmentStmt(new Variable("x"),
+                new NewExp(new ClassNameToken("foo"),  Arrays.asList(new IntLiteralExp(1)))); // var = exp
+        final Map<Variable, Type> typeEnvironment = new HashMap<Variable, Type>();
+        typeEnvironment.put(new Variable("x"), new ClassNameType(new ClassNameToken("Object")));
+        final ClassNameToken classes = new ClassNameToken("foo");
+        final Type type2 = new ClassNameType(new ClassNameToken("Object"));
         final Map<Variable, Type> receivedType = initTypechecker().isWellTypedStmt(assignmentStmt,
                 typeEnvironment, classes, type2);
         assertEquals(expectedType, receivedType);
