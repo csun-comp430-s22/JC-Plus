@@ -324,13 +324,15 @@ public class Parser {
         if (token instanceof VoidToken) {
             return new ParseResult<Type>(new VoidType(), position + 1);
         } else if (token instanceof IntToken) {
-            if(getToken(position + 1).toString() == "LeftBracketToken" ){
+            Token x = getToken(position +1);
+            if( getToken(position +1)!= null && getToken(position +1).toString() == "LeftBracketToken" ){
                 final ParseResult<Exp> exp = parseExp(position + 2);
                 assertTokenHereIs(exp.position, new parser.RightBracketToken());
                 return new ParseResult<Type>(new ArrayType(), exp.position);
             }else{
             return new ParseResult<Type>(new IntType(), position + 1);
             }
+        
         } else if (token instanceof ClassNameToken){
             assertTokenHereIs(position+1, new ClassToken());
             return new ParseResult<Type>(new ClassNameType(new ClassNameToken(getToken(position).toString())), position + 2);
@@ -482,7 +484,7 @@ public class Parser {
                         exp2.position + 2);
             }
         } else if (token instanceof ReturnToken) {
-            if (getToken(position + 1) instanceof Exp) { // return exp
+            if (getToken(position + 1).toString().contains("Exp")) { // return exp
                 final ParseResult<Exp> exp = parseExp(position + 1); // +2 because we are skipping 1 whitespace
                 assertTokenHereIs(exp.position, new SemiColonToken());
                 return new ParseResult<Stmt>(new ReturnNonVoidStmt(exp.result),

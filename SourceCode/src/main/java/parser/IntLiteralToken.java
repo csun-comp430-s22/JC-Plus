@@ -17,6 +17,6 @@ public class IntLiteralToken implements Token {
     }
 
     public String toString() {
-        return "IntLiteralToken(" + value + ")";
+        return "IntLiteralTokenExp(" + value + ")";
     }
 }
