@@ -59,7 +59,8 @@ classdef ::= class classname extends classname {
               instancedec* 
               constructor(vardec*) stmt* // vardecs are comma-sep 
               methoddef* } 
-
+	      
+program ::= classdef* stmt
 
 ```
 Computation Abstraction Non-Trivial Feature: ```Objects + methods with class-based inheritance.```
